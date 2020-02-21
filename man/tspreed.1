@@ -1,0 +1,111 @@
+.TH "tspreed" 1 "2020-02-21" "tspreed"
+
+.SH NAME
+tspreed \- shell RSVP speed reader with Spritz-like functionality
+
+.SH SYNOPSIS
+.B tspreed
+[\fB\-lqifb\fR]
+[\fB\-w\fR \fIwpm\fR]
+[\fB\-n\fR \fInum\fR]
+[\fB\-p\fR \fIvalue\fR]
+[\fB\-c\fR \fIcolor\fR]
+
+.SH DESCRIPTION
+\fBtspreed\fR is a shell RSVP speed reader with Spritz-like functionality. It reads plain text from stdin and presents it one word at time.
+
+If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
+
+.SH OPTIONS
+.TP
+.B -w \fIwpm\fR
+Speed words are presented at in words per minute. Required to be set. Minimum value of \fI1\fR.
+.TP
+.B -n \fInum\fR 
+Start presenting from the nth word. Minimum value of \fI1\fR.
+.TP
+.B -l
+Vary the speed words are presented at based on their length.
+.TP
+.B -q
+Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished.
+.TP
+.B -i
+Display progress information during the presentation.
+.TP
+.B -f
+Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented.
+.TP
+.B -p \fIvalue\fR
+Display pointers of a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Values: \fInone\fR, \fIline\fR, \fIpoint\fR.
+.TP
+.B -b
+Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
+.TP
+.B -c \fIcolor\fR
+Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are standard 8-bit ANSI color values, ranging from \fI0\fR to \fI7\fR.
+
+.SH CONFIGURATION
+The values provided in the command options take precidence over the values of the user's config file, which takes precidence over the values of the system-wide config file.
+.TP
+.B wpm=\fIwpm\fR
+Equivalent to \fB-w\fR option.
+.TP
+.B numstart=\fInum\fR
+Equivalent to \fB-n\fR option.
+.TP
+.B lengthvary=\fIbool\fR
+Equivalent to \fB-l\fR option.
+.TP
+.B quietexit=\fIbool\fR
+Equivalent to \fB-q\fR option.
+.TP
+.B proginfo=\fIbool\fR
+Equivalent to \fB-i\fR option.
+.TP
+.B focus=\fIbool\fR
+Equivalent to \fB-f\fR option.
+.TP
+.B focuspointer=\fItype\fR
+Equivalent to \fB-p\fR option.
+.TP
+.B focusbold=\fIbool\fR
+Equivalent to \fB-b\fR option.
+.TP
+.B focuscolor=\fIvalue\fR
+Equivalent to \fB-c\fR option.
+
+.SH EXIT STATUS
+.TP
+.B 0
+Successful completion of presentation.
+.TP
+.B 1
+Failure during initiation of presentaton.
+.TP
+.B 2
+Presentation terminated before completion.
+
+.SH FILES
+.TP
+.B \fI/etc/tspreed/tspreed.rc\fR
+System-wide configuration file.
+.TP
+.B \fI~/.config/tspreed/tspreed.rc\fR
+User-specific configuration file.
+
+.SH EXAMPLES
+.P
+$ \fBtspreed < textfile\fR
+.P
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -ifb -p line -c 1\fR
+
+.SH REPORTING BUGS
+Bugs and issues can be reported on GitHub or GitLab.
+
+https://github.com/n-ivkovic/tspreed/issues
+
+https://gitlab.com/n-ivkovic/tspreed/issues
+
+.SH AUTHORS
+Nicholas Ivkovic <nivkovic@tuta.io>.

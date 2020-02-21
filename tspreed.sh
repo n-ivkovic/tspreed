@@ -1,0 +1,179 @@
+#!/bin/sh
+
+# Graceful exit
+catchExit() {
+	tput rmcup
+	[ -z "$quietexit" ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
+	exit 2
+}
+
+# Initialise tput output
+initOutput() {
+	tput clear
+	
+	# Set terminal-based vars
+	termheight=$(tput lines)
+	termwidth=$(tput cols)
+	termxcenter=$(( termwidth/2 ))
+	termycenter=$(( termheight/2 ))
+	pointer1y=$(( termycenter-1 ))
+	pointer2y=$(( termycenter+1 ))
+
+	# Output pointers
+	if [ "$focus" = true ]; then
+		tput cup $pointer1y $termxcenter
+		printf "%s" "$pt1"
+		tput cup $pointer2y $termxcenter
+		printf "%s" "$pt2"
+	fi
+}
+
+# Perform floating point calculation
+# $1 Calculation to perform
+calcFloat() {
+	echo | awk "{ print $1 }"
+}
+
+# Display man refer
+displayRefer() {
+	echo "See 'man tspreed'"
+	exit 1
+}
+
+# Display command usage
+displayUsage() {
+	echo "Usage: tspreed [-lqifb] [-w wpm] [-n num] [-p value] [-c color]"
+	displayRefer
+}
+
+# Catch signals
+trap "catchExit" 2      # SIGINT 
+trap "catchExit" 3      # SIGQUIT
+trap "catchExit" 6      # SIGABRT
+trap "catchExit" 14     # SIGALRM
+trap "catchExit" 15     # SIGTERM
+trap "initOutput" WINCH # Terminal resize 
+
+# Import configs
+globalconfig="/etc/tspreed/tspreed.rc"
+localconfig="$HOME/.config/tspreed/tspreed.rc"
+[ -f "$globalconfig" ] && . "$globalconfig"
+[ -f "$localconfig" ] && . "$localconfig"
+
+# Get passed args
+while getopts ":w:n:qilfp:bc:" opt; do
+	case "$opt" in
+		w) wpm=$OPTARG;;
+		n) numstart="$OPTARG";;
+		l) lengthvary=true;;
+		q) quietexit=true;;
+		i) proginfo=true;;
+		f) focus=true;;
+		p) focuspointer="$OPTARG";;
+		b) focusbold=true;;
+		c) focuscolor="$OPTARG";;
+		\?) echo "Invalid option '-$OPTARG'" && displayUsage;;
+		:) echo "Option -$OPTARG requires an argument." && displayUsage;;
+	esac
+done
+	
+# Validate and set word speed
+[ -z "$wpm" ] && echo "Words per minute not set" && displayRefer
+[ "$wpm" -lt 1 ] && echo "Invalid wpm value '$wpm'" && displayRefer
+defaultdelay=$(calcFloat "1/($wpm/60)")
+
+# Validate and set nth word to start from
+[ -n "$numstart" ] && [ "$numstart" -lt 1 ] && echo "Invalid starting word number value '$numstart'" && displayRefer 
+[ -z "$numstart" ] && numstart=1
+
+# Focus letter options
+if [ -n "$focus" ]; then
+	# Validate and set focus letter pointers
+	pt1=" " && pt2=" "
+	if [ -n "$focuspointer" ] && [ "$focuspointer" != "none" ]; then
+		case "$focuspointer" in
+			line) pt1="|" && pt2="|";;
+			point) pt1="v" && pt2="^";;
+			default) echo "Invalid focus letter pointer '$focuspointer'" && displayRefer;;
+		esac
+	fi
+	# Validate focus letter color
+	[ -n "$focuscolor" ] && { [ "$focuscolor" -lt 0 ] || [ "$focuscolor" -gt 7 ]; } && echo "Invalid focus letter color '$focuscolor'" && displayRefer
+fi
+
+# Get input
+input=
+while read -r inp; do
+	input="$input$inp "
+done
+
+# Start output
+tput smcup
+initOutput
+
+# Present words
+wordlenaverage=5 # Based on average English word length of 5.1 letters
+wordstotal=$(echo "$input" | wc -w | tr -d "[:space:]")
+wordnum=0
+firstword=true
+for word in $input; do
+	# Increase word num
+	wordnum=$(( wordnum+1 ))
+	
+	# Skip if before starting word
+	[ "$wordnum" -lt "$numstart" ] && continue
+	
+	# Get length of word
+	wordlen=${#word}
+	
+	# Focus letter highlighting
+	if [ "$focus" = true ]; then
+		# Find index of focus letter
+		case "$wordlen" in 
+			1|2)         focusindex=1;;
+			3|4|5)       focusindex=2;;
+			6|7|8|9)     focusindex=3;;
+			10|11|12|13) focusindex=4;;
+			default)     focusindex=5;;
+		esac
+		
+		# Set horizontal position of word
+		wordx=$(( termxcenter-focusindex+1 ))
+		
+		# Highlight focus letter
+		wordstart=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, 1, val-1) }')
+		wordend=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, val+1) }')
+		focusletter=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, val, 1) }')
+		[ -n "$focusbold" ] && focusletter="$(tput bold)$focusletter"
+		[ -n "$focuscolor" ] && focusletter="$(tput setaf "$focuscolor")$focusletter"
+		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
+		word="$wordstart$focusletter$wordend"
+	else
+		# Set horizontal position of word
+		wordx=$(( termxcenter-(wordlen/2) ))
+	fi
+	
+	# Output word
+	tput cup $termycenter 0 && tput el && tput cup $termycenter $wordx
+	printf "%s" "$word"
+	
+	# Output presentation information
+	[ "$proginfo" = true ] && tput cup home && tput el && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(( (wordnum*100)/wordstotal ))"
+	
+	# Move cursor to bottom left
+	tput cup "$termheight" 0
+	
+	# Set delay between words
+	delay="$defaultdelay"
+	if [ "$firstword" = true ]; then
+		firstword=false && delay=1
+	elif [ "$lengthvary" = true ]; then
+		[ "$wordlen" -gt "$wordlenaverage" ] && delay=$(calcFloat "$delay*($wordlen/$wordlenaverage)") || delay=$(calcFloat "$delay*($wordlen/($wordlen+1))")
+	fi
+	sleep "$delay"
+done
+
+# Finish
+sleep 0.75
+tput rmcup
+exit 0
