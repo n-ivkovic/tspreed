@@ -4,7 +4,7 @@ tspreed is a shell RSVP speed reader with Spritz-like functionality. It reads pl
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
-![tspreed](.img/tspreed.png)
+![tspreed demo gif](.img/tspreed.gif)
 
 ## Installation
 
