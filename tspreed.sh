@@ -42,7 +42,7 @@ displayRefer() {
 
 # Display command usage
 displayUsage() {
-	echo "Usage: tspreed [-lqifb] [-w wpm] [-n num] [-p value] [-c color]"
+	echo "Usage: tspreed [-lqifb] [-w wpm] [-n num] [-p style] [-c color]"
 	displayRefer
 }
 
@@ -79,11 +79,11 @@ done
 	
 # Validate and set word speed
 [ -z "$wpm" ] && echo "Words per minute not set" && displayRefer
-[ "$wpm" -lt 1 ] && echo "Invalid wpm value '$wpm'" && displayRefer
+[ "$wpm" -lt 1 ] && echo "Invalid wpm '$wpm'" && displayRefer
 defaultdelay=$(calcFloat "1/($wpm/60)")
 
-# Validate and set nth word to start from
-[ -n "$numstart" ] && [ "$numstart" -lt 1 ] && echo "Invalid starting word number value '$numstart'" && displayRefer 
+# Validate and set nth word as starting word
+[ -n "$numstart" ] && [ "$numstart" -lt 1 ] && echo "Invalid starting word position '$numstart'" && displayRefer 
 [ -z "$numstart" ] && numstart=1
 
 # Focus letter options

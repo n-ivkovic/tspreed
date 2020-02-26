@@ -1,4 +1,4 @@
-.TH "tspreed" 1 "2020-02-21" "tspreed"
+.TH "tspreed" 1 "2020-02-26" "tspreed"
 
 .SH NAME
 tspreed \- shell RSVP speed reader with Spritz-like functionality
@@ -8,7 +8,7 @@ tspreed \- shell RSVP speed reader with Spritz-like functionality
 [\fB\-lqifb\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
-[\fB\-p\fR \fIvalue\fR]
+[\fB\-p\fR \fIstyle\fR]
 [\fB\-c\fR \fIcolor\fR]
 
 .SH DESCRIPTION
@@ -36,17 +36,17 @@ Display progress information during the presentation.
 .B -f
 Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented.
 .TP
-.B -p \fIvalue\fR
-Display pointers of a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Values: \fInone\fR, \fIline\fR, \fIpoint\fR.
+.B -p \fIstyle\fR
+Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: \fInone\fR, \fIline\fR, \fIpoint\fR.
 .TP
 .B -b
 Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
 .TP
 .B -c \fIcolor\fR
-Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are standard 8-bit ANSI color values, ranging from \fI0\fR to \fI7\fR.
+Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from \fI0\fR to \fI7\fR.
 
 .SH CONFIGURATION
-The values provided in the command options take precidence over the values of the user's config file, which takes precidence over the values of the system-wide config file.
+The values provided in the command options take precidence over the values of the user-specific config file, which takes precidence over the values of the system-wide config file.
 .TP
 .B wpm=\fIwpm\fR
 Equivalent to \fB-w\fR option.
@@ -66,13 +66,13 @@ Equivalent to \fB-i\fR option.
 .B focus=\fIbool\fR
 Equivalent to \fB-f\fR option.
 .TP
-.B focuspointer=\fItype\fR
+.B focuspointer=\fIstyle\fR
 Equivalent to \fB-p\fR option.
 .TP
 .B focusbold=\fIbool\fR
 Equivalent to \fB-b\fR option.
 .TP
-.B focuscolor=\fIvalue\fR
+.B focuscolor=\fIcolor\fR
 Equivalent to \fB-c\fR option.
 
 .SH EXIT STATUS
@@ -81,7 +81,7 @@ Equivalent to \fB-c\fR option.
 Successful completion of presentation.
 .TP
 .B 1
-Failure during initiation of presentaton.
+Failure during initiation of presentation.
 .TP
 .B 2
 Presentation terminated before completion.
@@ -98,7 +98,7 @@ User-specific configuration file.
 .P
 $ \fBtspreed < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -ifb -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.
