@@ -20,12 +20,7 @@ initOutput() {
 	pointer2y=$(( termycenter+1 ))
 
 	# Output pointers
-	if [ "$focus" = true ]; then
-		tput cup $pointer1y $termxcenter
-		printf "%s" "$pt1"
-		tput cup $pointer2y $termxcenter
-		printf "%s" "$pt2"
-	fi
+	[ "$focus" = true ] && tput cup $pointer1y $termxcenter && printf "%s" "$pt1" && tput cup $pointer2y $termxcenter && printf "%s" "$pt2"
 }
 
 # Perform floating point calculation
@@ -56,7 +51,7 @@ trap "initOutput" WINCH # Terminal resize
 
 # Import configs
 globalconfig="/etc/tspreed/tspreed.rc"
-localconfig="$HOME/.config/tspreed/tspreed.rc"
+localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$globalconfig" ] && . "$globalconfig"
 [ -f "$localconfig" ] && . "$localconfig"
 
@@ -154,8 +149,7 @@ for word in $input; do
 	fi
 	
 	# Output word
-	tput cup $termycenter 0 && tput el && tput cup $termycenter $wordx
-	printf "%s" "$word"
+	tput cup $termycenter 0 && tput el && tput cup $termycenter $wordx && printf "%s" "$word"
 	
 	# Output presentation information
 	[ "$proginfo" = true ] && tput cup home && tput el && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(( (wordnum*100)/wordstotal ))"

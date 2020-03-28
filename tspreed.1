@@ -1,7 +1,7 @@
-.TH "tspreed" 1 "2020-02-26" "tspreed"
+.TH tspreed 1 2020-03-28 tspreed
 
 .SH NAME
-tspreed \- shell RSVP speed reader with Spritz-like functionality
+tspreed \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
@@ -12,7 +12,7 @@ tspreed \- shell RSVP speed reader with Spritz-like functionality
 [\fB\-c\fR \fIcolor\fR]
 
 .SH DESCRIPTION
-\fBtspreed\fR is a shell RSVP speed reader with Spritz-like functionality. It reads plain text from stdin and presents it one word at time.
+\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality, written in Shell. It reads plain text from stdin and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -86,12 +86,17 @@ Failure during initiation of presentation.
 .B 2
 Presentation terminated before completion.
 
+.SH ENVIRONMENT
+.TP
+.B XDG_CONFIG_HOME
+The user-specific configuration is placed within the directory defined. If \fB$XDG_CONFIG_HOME\fR is empty or not set, then \f(BI$HOME\fI/.config\fR is used in its place. This is in accordance with the XDG Base Directory Specification as defined by freedesktop.org.
+
 .SH FILES
 .TP
 .B \fI/etc/tspreed/tspreed.rc\fR
 System-wide configuration file.
 .TP
-.B \fI~/.config/tspreed/tspreed.rc\fR
+.B \f(BI$XDG_CONFIG_HOME\fI/tspreed/tspreed.rc\fR
 User-specific configuration file.
 
 .SH EXAMPLES
