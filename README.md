@@ -52,6 +52,7 @@ The values provided in the command options take precidence over the values of th
 | -n `num`   | numstart=`num`       |               | Start presenting from the nth word. Minimum value of `1`. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
+| -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
 | -i         | proginfo=`bool`      |               | Display progress information during the presentation. |
 | -f         | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |

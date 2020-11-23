@@ -3,7 +3,7 @@
 # Graceful exit
 catchExit() {
 	tput rmcup
-	tput cvvis
+	[ "$hidecursor" = true ] && tput cnorm
 	[ -z "$quietexit" ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
 	exit 2
 }
@@ -11,7 +11,7 @@ catchExit() {
 # Initialise tput output
 initOutput() {
 	tput clear
-	tput civis
+	[ "$hidecursor" = true ] && tput civis
 
 	# Set terminal-based vars
 	termheight=$(tput lines)
@@ -39,7 +39,7 @@ displayRefer() {
 
 # Display command usage
 displayUsage() {
-	echo "Usage: tspreed [-lqifb] [-w wpm] [-n num] [-p style] [-c color]"
+	echo "Usage: tspreed [-lqhifb] [-w wpm] [-n num] [-p style] [-c color]"
 	displayRefer
 }
 
@@ -58,12 +58,13 @@ localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$localconfig" ] && . "$localconfig"
 
 # Get passed args
-while getopts ":w:n:qilfp:bc:" opt; do
+while getopts ":w:n:qhilfp:bc:" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG;;
 		n) numstart="$OPTARG";;
 		l) lengthvary=true;;
 		q) quietexit=true;;
+		h) hidecursor=true;;
 		i) proginfo=true;;
 		f) focus=true;;
 		p) focuspointer="$OPTARG";;

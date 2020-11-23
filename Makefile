@@ -60,7 +60,7 @@ else
 	@mkdir -p $(CONFLOCAL)
 	@touch $(CONFLOCAL)$(CONFFILE)
 	@chown -R $(USERNAME):$(USERGROUP) $(CONFLOCAL)
-	@printf "wpm=300\nfocuspointer=line\nfocusbold=true\nfocuscolor=1\n" >> $(CONFLOCAL)$(CONFFILE)
+	@printf "wpm=300\nhidecursor=true\nfocuspointer=line\nfocusbold=true\nfocuscolor=1\n" >> $(CONFLOCAL)$(CONFFILE)
 	@echo "Created local config $(CONFLOCAL)$(CONFFILE) with default values"
 endif
 

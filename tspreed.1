@@ -1,11 +1,11 @@
-.TH tspreed 1 2020-03-28 tspreed
+.TH tspreed 1 2020-11-24 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
-[\fB\-lqifb\fR]
+[\fB\-lqhifb\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
 [\fB\-p\fR \fIstyle\fR]
@@ -29,6 +29,9 @@ Vary the speed words are presented at based on their length.
 .TP
 .B -q
 Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished.
+.TP
+.B -h
+Hide the cursor during the presentation.
 .TP
 .B -i
 Display progress information during the presentation.
@@ -59,6 +62,9 @@ Equivalent to \fB-l\fR option.
 .TP
 .B quietexit=\fIbool\fR
 Equivalent to \fB-q\fR option.
+.TP
+.B hidecursor=\fIbool\fR
+Equivalent to \fB-h\fR option.
 .TP
 .B proginfo=\fIbool\fR
 Equivalent to \fB-i\fR option.
