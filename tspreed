@@ -1,9 +1,14 @@
 #!/bin/sh
 
-# Graceful exit
-catchExit() {
+# Finish tput session
+endTput() {
 	tput rmcup
 	[ "$hidecursor" = true ] && tput cnorm
+}
+
+# Handle exit from signals 
+catchExit() {
+	endTput
 	[ -z "$quietexit" ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
 	exit 2
 }
@@ -11,7 +16,6 @@ catchExit() {
 # Initialise tput output
 initOutput() {
 	tput clear
-	[ "$hidecursor" = true ] && tput civis
 
 	# Set terminal-based vars
 	termheight=$(tput lines)
@@ -108,6 +112,7 @@ done
 
 # Start output
 tput smcup
+[ "$hidecursor" = true ] && tput civis
 initOutput
 
 # Present words
@@ -173,5 +178,5 @@ done
 
 # Finish
 sleep 0.75
-tput rmcup
+endTput
 exit 0
