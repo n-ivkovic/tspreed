@@ -101,7 +101,7 @@ if [ -n "$focus" ]; then
 		esac
 	fi
 	# Validate focus letter color
-	[ -n "$focuscolor" ] && { [ "$focuscolor" -lt 0 ] || [ "$focuscolor" -gt 7 ]; } && echo "Invalid focus letter color '$focuscolor'" && displayRefer
+	[ -n "$focuscolor" ] && { [ "$focuscolor" -lt 0 ] || [ "$focuscolor" -gt 255 ]; } && echo "Invalid focus letter color '$focuscolor'" && displayRefer
 fi
 
 # Get input
