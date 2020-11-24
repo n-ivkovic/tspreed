@@ -39,7 +39,7 @@ displayRefer() {
 
 # Display command usage
 displayUsage() {
-	echo "Usage: tspreed [-lqhifb] [-w wpm] [-n num] [-p style] [-c color]"
+	echo "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]"
 	displayRefer
 }
 
@@ -58,7 +58,7 @@ localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$localconfig" ] && . "$localconfig"
 
 # Get passed args
-while getopts ":w:n:qhilfp:bc:" opt; do
+while getopts ":w:n:qhilfp:bc:v" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG;;
 		n) numstart="$OPTARG";;
@@ -70,6 +70,7 @@ while getopts ":w:n:qhilfp:bc:" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
+		v) echo "tspreed 1.2.0" && exit 0;;
 		\?) echo "Invalid option '-$OPTARG'" && displayUsage;;
 		:) echo "Option -$OPTARG requires an argument." && displayUsage;;
 	esac

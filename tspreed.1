@@ -5,14 +5,14 @@ tspreed \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
-[\fB\-lqhifb\fR]
+[\fB\-lqhifbv\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
 [\fB\-p\fR \fIstyle\fR]
 [\fB\-c\fR \fIcolor\fR]
 
 .SH DESCRIPTION
-\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality, written in Shell. It reads plain text from stdin and presents it one word at time.
+\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in POSIX shell. It reads plain text from stdin and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -47,6 +47,9 @@ Display the focus letter in bold. Only takes effect if focus letter highlighting
 .TP
 .B -c \fIcolor\fR
 Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from \fI0\fR to \fI7\fR.
+.TP
+.B -v
+Print tspreed version.
 
 .SH CONFIGURATION
 The values provided in the command options take precidence over the values of the user-specific config file, which takes precidence over the values of the system-wide config file.

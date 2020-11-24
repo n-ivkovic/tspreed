@@ -1,6 +1,6 @@
 # tspreed
 
-tspreed is a shell RSVP speed reader with Spritz-like functionality. It reads plain text from stdin and presents it one word at time.
+tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX shell. It reads plain text from stdin and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -58,6 +58,7 @@ The values provided in the command options take precidence over the values of th
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
 | -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from `0` to `7`. |
+| -v         |                      |               | Print tspreed version. |
 
 The default values will be stored in the user-specific config file `~/.config/tspreed/tspreed.rc` (`$XDG_CONFIG_HOME/tspreed/tspreed.rc` if defined) after installation.
 
