@@ -23,26 +23,18 @@ install:
 ifneq ($(wildcard $(BINDIR)$(EXEC)),)
 	@echo "$(EXEC) already installed in $(BINDIR)"
 else
-ifneq ($(shell which install),)
-	@install -D $(EXEC) -t $(BINDIR)
-else
 	@mkdir -p $(BINDIR)
 	@cp $(EXEC) $(BINDIR)$(EXEC)
 	@chmod 755 $(BINDIR)$(EXEC)
-endif
 	@echo "Installed $(EXEC) in $(BINDIR)"
 endif
 # Install man page
 ifneq ($(wildcard $(MANDIR)$(EXEC).$(MANSEC)*),)
 	@echo "Man page $(MANDIR)$(EXEC).$(MANSEC) already exists"
 else
-ifneq ($(shell which install),)
-	@install -m 644 -D $(EXEC).$(MANSEC) -t $(MANDIR)
-else
 	@mkdir -p $(MANDIR)
 	@cp $(EXEC).$(MANSEC) $(MANDIR)
 	@chown 644 $(MANDIR)$(EXEC).$(MANSEC)
-endif
 	@echo "Created man page $(MANDIR)$(EXEC).$(MANSEC)"
 endif
 # Create global config
