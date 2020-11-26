@@ -32,7 +32,7 @@ initOutput() {
 # Perform floating point calculation
 # $1 Calculation to perform
 calcFloat() {
-	echo | awk "{ print $1 }"
+	awk "BEGIN { print $1 }"
 }
 
 # Display man refer
@@ -145,9 +145,9 @@ for word in $input; do
 		wordx=$(( termxcenter-focusindex+1 ))
 
 		# Highlight focus letter
-		wordstart=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, 1, val-1) }')
-		wordend=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, val+1) }')
-		focusletter=$(echo "$word" | awk -v val=$focusindex '{ print substr($1, val, 1) }')
+		wordstart=$(expr substr "$word" 1 $(( focusindex - 1 )))
+		wordend=$(expr substr "$word" $(( focusindex + 1 )) $(( wordlen - focusindex )))
+		focusletter=$(expr substr "$word" "$focusindex" 1)
 		[ -n "$focusbold" ] && focusletter="$(tput bold)$focusletter"
 		[ -n "$focuscolor" ] && focusletter="$(tput setaf "$focuscolor")$focusletter"
 		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
