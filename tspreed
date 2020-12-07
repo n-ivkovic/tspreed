@@ -145,9 +145,9 @@ for word in $input; do
 		wordx=$(( termxcenter-focusindex+1 ))
 
 		# Highlight focus letter
-		wordstart=$(expr substr "$word" 1 $(( focusindex - 1 )))
-		wordend=$(expr substr "$word" $(( focusindex + 1 )) $(( wordlen - focusindex )))
-		focusletter=$(expr substr "$word" "$focusindex" 1)
+		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$(( focusindex - 1 )))
+		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $(( focusindex + 1 ))-"$wordlen")
+		focusletter=$(echo "$word" | cut -c "$focusindex")
 		[ -n "$focusbold" ] && focusletter="$(tput bold)$focusletter"
 		[ -n "$focuscolor" ] && focusletter="$(tput setaf "$focuscolor")$focusletter"
 		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
