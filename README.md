@@ -67,7 +67,7 @@ The default values will be stored in the user-specific config file `~/.config/ts
 Please attempt to adhere to the following when creating a pull request:
 
 * Ensure all shell script written is POSIX-compliant. This can be checked using [ShellCheck](https://www.shellcheck.net/). Ensure ShellCheck gives no addtional warnings when the changes made are checked compared to any warnings given when the `develop` branch is checked. If there are additional warnings please provide a justificaition.
-* Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the PR merges back into `develop`. Note that if the pull request is accepted the target branch maybe changed to either `feature/[branch-name]` or `fix/[branch-name]`.
+* Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
 
 ## Licence
 
