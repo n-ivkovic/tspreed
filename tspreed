@@ -74,7 +74,7 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) echo "tspreed 1.2.0" && exit 0;;
+		v) echo "tspreed 1.2.1" && exit 0;;
 		\?) echo "Invalid option '-$OPTARG'" && displayUsage;;
 		:) echo "Option -$OPTARG requires an argument." && displayUsage;;
 	esac
