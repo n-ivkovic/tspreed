@@ -9,7 +9,7 @@ endTput() {
 # Handle exit from signals 
 catchExit() {
 	endTput
-	[ -z "$quietexit" ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
+	[ ! "$quietexit" = true ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
 	exit 2
 }
 
@@ -74,7 +74,7 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) echo "tspreed 1.2.1" && exit 0;;
+		v) echo "tspreed 1.2.2" && exit 0;;
 		\?) echo "Invalid option '-$OPTARG'" && displayUsage;;
 		:) echo "Option -$OPTARG requires an argument." && displayUsage;;
 	esac
@@ -90,7 +90,7 @@ defaultdelay=$(calcFloat "1/($wpm/60)")
 [ -z "$numstart" ] && numstart=1
 
 # Focus letter options
-if [ -n "$focus" ]; then
+if [ "$focus" = true ]; then
 	# Validate and set focus letter pointers
 	pt1=" " && pt2=" "
 	if [ -n "$focuspointer" ] && [ "$focuspointer" != "none" ]; then
@@ -148,7 +148,7 @@ for word in $input; do
 		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$(( focusindex - 1 )))
 		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $(( focusindex + 1 ))-"$wordlen")
 		focusletter=$(echo "$word" | cut -c "$focusindex")
-		[ -n "$focusbold" ] && focusletter="$(tput bold)$focusletter"
+		[ "$focusbold" = true ] && focusletter="$(tput bold)$focusletter"
 		[ -n "$focuscolor" ] && focusletter="$(tput setaf "$focuscolor")$focusletter"
 		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
 		word="$wordstart$focusletter$wordend"
