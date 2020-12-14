@@ -1,4 +1,4 @@
-.TH tspreed 1 2020-11-24 tspreed
+.TH tspreed 1 2020-12-14 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -98,7 +98,7 @@ Presentation terminated before completion.
 .SH ENVIRONMENT
 .TP
 .B XDG_CONFIG_HOME
-The user-specific configuration is placed within the directory defined. If \fB$XDG_CONFIG_HOME\fR is empty or not set, then \f(BI$HOME\fI/.config\fR is used in its place. This is in accordance with the XDG Base Directory Specification as defined by freedesktop.org.
+User-specific configuration is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is empty or not set, then \f(BI$HOME\fI/.config\fR is used in its place. This is in accordance with the XDG Base Directory Specification as defined by freedesktop.org.
 
 .SH FILES
 .TP
@@ -117,9 +117,14 @@ $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.
 
-https://github.com/n-ivkovic/tspreed/issues
+<https://github.com/n-ivkovic/tspreed/issues>
 
-https://gitlab.com/n-ivkovic/tspreed/issues
+<https://gitlab.com/n-ivkovic/tspreed/issues>
 
 .SH AUTHORS
 Nicholas Ivkovic <nivkovic@tuta.io>.
+
+.SH COPYRIGHT
+Copyright (c) 2020 Nicholas Ivkovic.
+
+Licensed under the GNU General Public License version 3 or later, see ./LICENSE or <https://gnu.org/licenses/gpl.html> for details.

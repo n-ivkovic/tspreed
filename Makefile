@@ -1,18 +1,21 @@
-USERNAME   = $(shell logname)
-USERGROUP  = $(shell id -g $(USERNAME))
-USERHOME   = $(shell echo ~$(USERNAME))/
+USERNAME      = $(shell logname)
+USERGROUP     = $(shell id -g $(USERNAME))
+USERHOME      = $(shell echo ~$(USERNAME))/
 ifneq (${XDG_CONFIG_HOME},)
-CONFIGHOME = ${XDG_CONFIG_HOME}/
+CONFIGHOME    = ${XDG_CONFIG_HOME}/
 else
-CONFIGHOME = $(USERHOME).config/
+CONFIGHOME    = $(USERHOME).config/
 endif
-MANSEC     = 1
-EXEC       = tspreed
-BINDIR     = /usr/local/bin/
-MANDIR     = /usr/local/share/man/man$(MANSEC)/
-CONFGLOBAL = /etc/$(EXEC)/
-CONFLOCAL  = $(CONFIGHOME)$(EXEC)/
-CONFFILE   = $(EXEC).rc
+EXEC          = tspreed
+BINDIR        = /usr/local/bin/
+BIN           = $(BINDIR)$(EXEC)
+MANSECTION    = 1
+MANDIR        = /usr/local/share/man/man$(MANSECTION)/
+MANFILE       = $(EXEC).$(MANSECTION)
+MAN           = $(MANDIR)$(MANFILE)
+CONFGLOBALDIR = /etc/$(EXEC)/
+CONFGLOBAL    = $(CONFGLOBALDIR)$(EXEC).rc
+CONFLOCALDIR  = $(CONFIGHOME)$(EXEC)/
 
 .PHONY: defualt
 default: help
@@ -20,74 +23,72 @@ default: help
 .PHONY: install
 install:
 # Install executable
-ifneq ($(wildcard $(BINDIR)$(EXEC)),)
+ifneq ($(wildcard $(BIN)),)
 	@echo "$(EXEC) already installed in $(BINDIR)"
 else
 	@mkdir -p $(BINDIR)
-	@cp $(EXEC) $(BINDIR)$(EXEC)
-	@chmod 755 $(BINDIR)$(EXEC)
+	@cp $(EXEC) $(BIN)
+	@chmod 755 $(BIN)
 	@echo "Installed $(EXEC) in $(BINDIR)"
 endif
 # Install man page
-ifneq ($(wildcard $(MANDIR)$(EXEC).$(MANSEC)*),)
-	@echo "Man page $(MANDIR)$(EXEC).$(MANSEC) already exists"
+ifneq ($(wildcard $(MAN)),)
+	@echo "Man page $(MANFILE) already exists"
 else
 	@mkdir -p $(MANDIR)
-	@cp $(EXEC).$(MANSEC) $(MANDIR)
-	@chown 644 $(MANDIR)$(EXEC).$(MANSEC)
-	@echo "Created man page $(MANDIR)$(EXEC).$(MANSEC)"
+	@cp $(MANFILE) $(MAN)
+	@chown 644 $(MAN)
+	@echo "Created man page $(MAN)"
 endif
-# Create global config
-ifneq ($(wildcard $(CONFGLOBAL)$(CONFFILE)),)
-	@echo "Global config $(CONFGLOBAL)$(CONFFILE) already exists"
+# Install global config
+ifneq ($(wildcard $(CONFGLOBAL)),)
+	@echo "Global config $(CONFGLOBAL) already exists"
 else
-	@mkdir -p $(CONFGLOBAL)
-	@touch $(CONFGLOBAL)$(CONFFILE)
-	@echo "Created global config $(CONFGLOBAL)$(CONFFILE)"
+	@mkdir -p $(CONFGLOBALDIR)
+	@cp default.rc $(CONFGLOBAL)
+	@chown 644 $(CONFGLOBAL)
+	@echo "Created global config $(CONFGLOBAL)"
 endif
-# Create local config with default values
-ifneq ($(wildcard $(CONFLOCAL)$(CONFFILE)),)
-	@echo "Local config $(CONFLOCAL)$(CONFFILE) already exists"
+# Create local config directory
+ifneq ($(wildcard $(CONFLOCALDIR).*),)
+	@echo "Local config directory $(CONFLOCALDIR) already exists"
 else
-	@mkdir -p $(CONFLOCAL)
-	@touch $(CONFLOCAL)$(CONFFILE)
-	@chown -R $(USERNAME):$(USERGROUP) $(CONFLOCAL)
-	@printf "wpm=300\nhidecursor=true\nfocuspointer=line\nfocusbold=true\nfocuscolor=1\n" >> $(CONFLOCAL)$(CONFFILE)
-	@echo "Created local config $(CONFLOCAL)$(CONFFILE) with default values"
+	@mkdir -p $(CONFLOCALDIR)
+	@echo "Created local config directory $(CONFLOCALDIR)"
 endif
 
 .PHONY: uninstall
 uninstall:
 # Uninstall executable
-ifeq ($(wildcard $(BINDIR)$(EXEC)),)
-	@echo "$(EXEC) is not installed in $(BINDIR)"
+ifeq ($(wildcard $(BIN)),)
+	@echo "$(EXEC) not installed in $(BINDIR)"
 else
-	@rm -f $(BINDIR)$(EXEC)	
+	@rm -f $(BIN)
 	@echo "Uninstalled $(EXEC) from $(BINDIR)"
 endif
 # Uninstall man page
-ifeq ($(wildcard $(MANDIR)$(EXEC).$(MANSEC)*),)
-	@echo "Man page $(MANDIR)$(EXEC).$(MANSEC) does not exist"
+ifeq ($(wildcard $(MAN)),)
+	@echo "Man page $(MAN) does not exist"
 else
-	@rm -f $(MANDIR)$(EXEC).$(MANSEC)
-	@echo "Removed man page $(MANDIR)$(EXEC).$(MANSEC)"
+	@rm -f $(MAN)
+	@echo "Removed man page $(MAN)"
 endif
 
 .PHONY: purge
 purge: uninstall
 # Remove global config dir
-ifeq ($(wildcard $(CONFGLOBAL).*),)
-	@echo "Global config directory $(CONFGLOBAL) does not exist"
+ifeq ($(wildcard $(CONFGLOBALDIR).*),)
+	@echo "Global config directory $(CONFGLOBALDIR) does not exist"
 else
-	@rm -rf $(CONFGLOBAL)
-	@echo "Removed global config directory $(CONFGLOBAL)"
+	@rm -rf $(CONFGLOBALDIR)
+	@echo "Removed global config directory $(CONFGLOBALDIR)"
 endif
 # Remove local config dir
-ifeq ($(wildcard $(CONFLOCAL).*),)
-	@echo "Local config directory $(CONFLOCAL) does not exist"
+ifeq ($(wildcard $(CONFLOCALDIR).*),)
+	@echo "Local config directory $(CONFLOCALDIR) does not exist"
 else
-	@rm -rf $(CONFLOCAL)
-	@echo "Removed local config directory $(CONFLOCAL)"
+	@rm -rf $(CONFLOCALDIR)
+	@echo "Removed local config directory $(CONFLOCALDIR)"
 endif
 
 .PHONY: help

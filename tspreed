@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Copyright (c) 2020 Nicholas Ivkovic.
+# Licensed under the GNU General Public License version 3 or later, see ./LICENSE or <https://gnu.org/licenses/gpl.html> for details.
+
 # Finish tput session
 endTput() {
 	tput rmcup
