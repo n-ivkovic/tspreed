@@ -34,7 +34,7 @@ ifneq ($(wildcard $(MANDIR)$(EXEC).$(MANSEC)*),)
 else
 	@mkdir -p $(MANDIR)
 	@cp $(EXEC).$(MANSEC) $(MANDIR)
-	@chown 644 $(MANDIR)$(EXEC).$(MANSEC)
+	@chmod 644 $(MANDIR)$(EXEC).$(MANSEC)
 	@echo "Created man page $(MANDIR)$(EXEC).$(MANSEC)"
 endif
 # Create global config
