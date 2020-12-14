@@ -25,11 +25,9 @@ initOutput() {
 	termwidth=$(tput cols)
 	termxcenter=$(( termwidth/2 ))
 	termycenter=$(( termheight/2 ))
-	pointer1y=$(( termycenter-1 ))
-	pointer2y=$(( termycenter+1 ))
 
 	# Output pointers
-	[ "$focus" = true ] && tput cup $pointer1y $termxcenter && printf "%s" "$pt1" && tput cup $pointer2y $termxcenter && printf "%s" "$pt2"
+	[ "$focus" = true ] && tput cup $(( termycenter-1 )) $termxcenter && printf "%s" "$pt1" && tput cup $(( termycenter+1 )) $termxcenter && printf "%s" "$pt2"
 }
 
 # Perform floating point calculation
@@ -141,8 +139,11 @@ for word in $input; do
 			3|4|5)       focusindex=2;;
 			6|7|8|9)     focusindex=3;;
 			10|11|12|13) focusindex=4;;
-			default)     focusindex=5;;
+			*)           focusindex=5;;
 		esac
+
+		# Determine if word length exceeds terminal width
+		[ $(( wordlen+termxcenter-focusindex+1 )) -gt "$termwidth" ] && wordlenexceed=true
 
 		# Set horizontal position of word
 		wordx=$(( termxcenter-focusindex+1 ))
@@ -156,8 +157,7 @@ for word in $input; do
 		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
 		word="$wordstart$focusletter$wordend"
 	else
-		# Set horizontal position of word
-		wordx=$(( termxcenter-(wordlen/2) ))
+		[ $(( wordlen+termxcenter-(wordlen/2) )) -gt "$termwidth" ] && wordlenexceed=true && wordx=0 || wordx=$(( termxcenter-(wordlen/2) ))
 	fi
 
 	# Output word
@@ -177,6 +177,9 @@ for word in $input; do
 		[ "$wordlen" -gt "$wordlenaverage" ] && delay=$(calcFloat "$delay*($wordlen/$wordlenaverage)") || delay=$(calcFloat "$delay*($wordlen/($wordlen+1))")
 	fi
 	sleep "$delay"
+
+	# Re-init output if word length exceeds terminal width
+	[ "$wordlenexceed" = true ] && [ "$wordnum" -lt "$wordstotal" ] && initOutput
 done
 
 # Finish
