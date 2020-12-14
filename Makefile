@@ -1,5 +1,4 @@
 USERNAME      = $(shell logname)
-USERGROUP     = $(shell id -g $(USERNAME))
 USERHOME      = $(shell echo ~$(USERNAME))/
 ifneq (${XDG_CONFIG_HOME},)
 CONFIGHOME    = ${XDG_CONFIG_HOME}/

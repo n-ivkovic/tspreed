@@ -60,7 +60,7 @@ The default values are stored in [`./default.rc`](./default.rc), which is used a
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
 | -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from 0 to 255. |
-| -v         |                      |               | Print tspreed version. |
+| -v         |                      |               | Print tspreed version and exit. |
 
 ## Contributing
 
