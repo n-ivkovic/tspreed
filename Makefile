@@ -45,7 +45,7 @@ ifneq ($(wildcard $(CONFGLOBAL)),)
 else
 	@mkdir -p $(CONFGLOBALDIR)
 	@cp default.rc $(CONFGLOBAL)
-	@chown 644 $(CONFGLOBAL)
+	@chmod 644 $(CONFGLOBAL)
 	@echo "Created global config $(CONFGLOBAL)"
 endif
 # Create local config directory
