@@ -36,7 +36,7 @@ ifneq ($(wildcard $(MAN)),)
 else
 	@mkdir -p $(MANDIR)
 	@cp $(MANFILE) $(MAN)
-	@chown 644 $(MAN)
+	@chmod 644 $(MAN)
 	@echo "Created man page $(MAN)"
 endif
 # Install global config
