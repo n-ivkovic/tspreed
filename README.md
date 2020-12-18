@@ -8,7 +8,16 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 ## Installation
 
-### Install
+### Packages
+
+| Distro | Package | Maintainer |
+| ---    | ---     | ---        |
+| Arch Linux, Manjaro | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Caltlgin Stsodaat |
+| Void Linux          | WIP, see [here](https://github.com/void-linux/void-packages/pull/27113) | KawaiiAmber |
+
+### Manual
+
+#### Install
 
 ```
 # Replace github.com with gitlab.com if using GitLab
@@ -17,7 +26,7 @@ $ cd tspreed
 $ sudo make install
 ```
 
-### Update
+#### Update
 
 ```
 $ sudo make uninstall
@@ -25,7 +34,7 @@ $ git pull origin
 $ sudo make install
 ```
 
-### Additional options
+#### Additional options
 
 ```
 $ make help
