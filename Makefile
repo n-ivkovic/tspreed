@@ -1,3 +1,5 @@
+DESTDIR       = /
+PREFIX        = /usr/local
 USERNAME      = $(shell logname)
 USERHOME      = $(shell echo ~$(USERNAME))/
 ifneq (${XDG_CONFIG_HOME},)
@@ -6,20 +8,17 @@ else
 CONFIGHOME    = $(USERHOME).config/
 endif
 EXEC          = tspreed
-BINDIR        = /usr/local/bin/
+BINDIR        = $(DESTDIR)$(PREFIX)/bin/
 BIN           = $(BINDIR)$(EXEC)
-MANSECTION    = 1
-MANDIR        = /usr/local/share/man/man$(MANSECTION)/
-MANFILE       = $(EXEC).$(MANSECTION)
+MANDIR        = $(DESTDIR)$(PREFIX)/share/man/man1/
+MANFILE       = $(EXEC).1
 MAN           = $(MANDIR)$(MANFILE)
-CONFGLOBALDIR = /etc/$(EXEC)/
+CONFGLOBALDIR = $(DESTDIR)/etc/$(EXEC)/
 CONFGLOBAL    = $(CONFGLOBALDIR)$(EXEC).rc
 CONFLOCALDIR  = $(CONFIGHOME)$(EXEC)/
 
-.PHONY: defualt
 default: help
 
-.PHONY: install
 install:
 # Install executable
 ifneq ($(wildcard $(BIN)),)
@@ -56,7 +55,6 @@ else
 	@echo "Created local config directory $(CONFLOCALDIR)"
 endif
 
-.PHONY: uninstall
 uninstall:
 # Uninstall executable
 ifeq ($(wildcard $(BIN)),)
@@ -73,7 +71,6 @@ else
 	@echo "Removed man page $(MAN)"
 endif
 
-.PHONY: purge
 purge: uninstall
 # Remove global config dir
 ifeq ($(wildcard $(CONFGLOBALDIR).*),)
@@ -90,7 +87,6 @@ else
 	@echo "Removed local config directory $(CONFLOCALDIR)"
 endif
 
-.PHONY: help
 help:
 	@echo ""
 	@echo "             Display help"
@@ -99,3 +95,5 @@ help:
 	@echo "  purge      Uninstall $(EXEC), remove config directories"
 	@echo "  help       Display help"
 	@echo ""
+
+.PHONY: default install uninstall purge help
