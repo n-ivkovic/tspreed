@@ -8,6 +8,9 @@ MAN           = $(MANDIR)/$(MANFILE)
 CONFGLOBALDIR = $(DESTDIR)/etc/$(EXEC)
 CONFGLOBAL    = $(CONFGLOBALDIR)/$(EXEC).rc
 
+# Mainly for non-GNU Make
+SHELL = /bin/sh
+
 default: help
 
 install:
