@@ -19,19 +19,19 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 #### Install
 
+Replace github.com with gitlab.com if using GitLab
 ```
-# Replace github.com with gitlab.com if using GitLab
 $ git clone https://github.com/n-ivkovic/tspreed
 $ cd tspreed
-$ sudo make install
+# make install
 ```
 
 #### Update
 
 ```
-$ sudo make uninstall
+# make uninstall
 $ git pull origin
-$ sudo make install
+# make install
 ```
 
 #### Additional options
