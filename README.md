@@ -12,7 +12,7 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 | Distro | Package | Maintainer |
 | ---    | ---     | ---        |
-| Arch Linux, Manjaro | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Caltlgin Stsodaat |
+| Arch Linux, Manjaro | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Nicholas Ivkovic |
 | Void Linux          | WIP, see [here](https://github.com/void-linux/void-packages/pull/27113) | KawaiiAmber |
 
 ### Manual
@@ -81,6 +81,8 @@ Please attempt to adhere to the following when creating a pull request:
 
 ## License
 
-Copyright © 2020 Nicholas Ivkovic.
+Copyright © 2021 Nicholas Ivkovic.
 
-Licensed under the GNU General Public License version 3 or later, see [`./LICENSE`](./LICENSE) or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) for details.
+Licensed under the GNU General Public License version 3 or later. See [`./LICENSE`](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
+
+This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.

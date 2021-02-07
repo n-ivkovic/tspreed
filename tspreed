@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# Copyright (c) 2020 Nicholas Ivkovic.
-# Licensed under the GNU General Public License version 3 or later, see ./LICENSE or <https://gnu.org/licenses/gpl.html> for details.
+# Copyright (c) 2021 Nicholas Ivkovic.
+# Licensed under the GNU General Public License version 3 or later. See ./LICENSE, or <https://gnu.org/licenses/gpl.html> if more recent, for details.
+# This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
 # Finish tput session
 endTput() {
@@ -12,20 +13,18 @@ endTput() {
 # Handle exit from signals 
 catchExit() {
 	endTput
-	[ ! "$quietexit" = true ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
+	! [ "$quietexit" = true ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
 	exit 2
 }
 
 # Initialise tput output
 initOutput() {
 	tput clear
-
 	# Set terminal-based vars
 	termheight=$(tput lines)
 	termwidth=$(tput cols)
 	termxcenter=$(( termwidth/2 ))
 	termycenter=$(( termheight/2 ))
-
 	# Output pointers
 	[ "$focus" = true ] && tput cup $(( termycenter-1 )) $termxcenter && printf "%s" "$pt1" && tput cup $(( termycenter+1 )) $termxcenter && printf "%s" "$pt2"
 }
@@ -36,16 +35,14 @@ calcFloat() {
 	awk "BEGIN { print $1 }"
 }
 
-# Display man refer
-displayRefer() {
-	echo "See 'man tspreed'"
-	exit 1
+# Exit showing man refer
+exitRefer() {
+	echo "See 'man tspreed'" && exit 1
 }
 
-# Display command usage
-displayUsage() {
-	echo "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]"
-	displayRefer
+# Exit showing command usage
+exitUsage() {
+	echo "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]" && exitRefer
 }
 
 # Catch signals
@@ -75,34 +72,30 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) echo "tspreed 1.2.2" && exit 0;;
-		\?) echo "Invalid option '-$OPTARG'" && displayUsage;;
-		:) echo "Option -$OPTARG requires an argument." && displayUsage;;
+		v) echo "tspreed 1.2.3" && exit 0;;
+		\?) echo "Invalid option '-$OPTARG'" && exitUsage;;
+		:) echo "Option -$OPTARG requires an argument." && exitUsage;;
 	esac
 done
 
 # Validate and set word speed
-[ -z "$wpm" ] && echo "Words per minute not set" && displayRefer
-[ "$wpm" -lt 1 ] && echo "Invalid wpm '$wpm'" && displayRefer
+[ -z "$wpm" ] && echo "Words per minute not set" && exitRefer
+! [ "$wpm" -ge 1 ] 2> /dev/null && echo "Invalid wpm '$wpm'" && exitRefer
 defaultdelay=$(calcFloat "1/($wpm/60)")
-
 # Validate and set nth word as starting word
-[ -n "$numstart" ] && [ "$numstart" -lt 1 ] && echo "Invalid starting word position '$numstart'" && displayRefer 
+[ -n "$numstart" ] && ! [ "$numstart" -ge 1 ] 2> /dev/null && echo "Invalid starting word position '$numstart'" && exitRefer 
 [ -z "$numstart" ] && numstart=1
-
-# Focus letter options
+# Validate focus letter options
 if [ "$focus" = true ]; then
 	# Validate and set focus letter pointers
 	pt1=" " && pt2=" "
-	if [ -n "$focuspointer" ] && [ "$focuspointer" != "none" ]; then
-		case "$focuspointer" in
-			line) pt1="|" && pt2="|";;
-			point) pt1="v" && pt2="^";;
-			default) echo "Invalid focus letter pointer '$focuspointer'" && displayRefer;;
-		esac
-	fi
+	[ -n "$focuspointer" ] && [ "$focuspointer" != "none" ] && case "$focuspointer" in
+		line) pt1="|" && pt2="|";;
+		point) pt1="v" && pt2="^";;
+		*) echo "Invalid focus letter pointer '$focuspointer'" && exitRefer;;
+	esac
 	# Validate focus letter color
-	[ -n "$focuscolor" ] && { [ "$focuscolor" -lt 0 ] || [ "$focuscolor" -gt 255 ]; } && echo "Invalid focus letter color '$focuscolor'" && displayRefer
+	[ -n "$focuscolor" ] && ! { [ "$focuscolor" -ge 0 ] && [ "$focuscolor" -le 255 ]; } 2> /dev/null && echo "Invalid focus letter color '$focuscolor'" && exitRefer
 fi
 
 # Get input
@@ -111,24 +104,21 @@ while read -r inp; do
 	input="$input$inp "
 done
 
-# Start output
+# Init presentation
 tput smcup
 [ "$hidecursor" = true ] && tput civis
 initOutput
-
-# Present words
 wordlenaverage=5 # Based on average English word length of 5.1 letters
 wordstotal=$(echo "$input" | wc -w | tr -d "[:space:]")
 wordnum=0
 firstword=true
-for word in $input; do
-	# Increase word num
-	wordnum=$(( wordnum+1 ))
 
+# Present
+for word in $input; do
+	# Init word 
+	wordnum=$(( wordnum+1 ))
 	# Skip if before starting word
 	[ "$wordnum" -lt "$numstart" ] && continue
-
-	# Get length of word
 	wordlen=${#word}
 
 	# Focus letter highlighting
@@ -141,13 +131,10 @@ for word in $input; do
 			10|11|12|13) focusindex=4;;
 			*)           focusindex=5;;
 		esac
-
 		# Determine if word length exceeds terminal width
 		[ $(( wordlen+termxcenter-focusindex+1 )) -gt "$termwidth" ] && wordlenexceed=true
-
 		# Set horizontal position of word
 		wordx=$(( termxcenter-focusindex+1 ))
-
 		# Highlight focus letter
 		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$(( focusindex - 1 )))
 		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $(( focusindex + 1 ))-"$wordlen")
@@ -157,15 +144,14 @@ for word in $input; do
 		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$(tput sgr0)"
 		word="$wordstart$focusletter$wordend"
 	else
+		# Set horizontal position of word
 		[ $(( wordlen+termxcenter-(wordlen/2) )) -gt "$termwidth" ] && wordlenexceed=true && wordx=0 || wordx=$(( termxcenter-(wordlen/2) ))
 	fi
 
 	# Output word
 	tput cup $termycenter 0 && tput el && tput cup $termycenter $wordx && printf "%s" "$word"
-
 	# Output presentation information
 	[ "$proginfo" = true ] && tput cup home && tput el && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(( (wordnum*100)/wordstotal ))"
-
 	# Move cursor to bottom left
 	tput cup "$termheight" 0
 
@@ -183,6 +169,4 @@ for word in $input; do
 done
 
 # Finish
-sleep 0.75
-endTput
-exit 0
+sleep 1 && endTput && exit 0
