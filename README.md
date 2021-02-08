@@ -59,7 +59,7 @@ The default values are stored in [`./default.rc`](./default.rc), which is used a
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
-| -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in words per minute. Required to be set. Minimum value of 1. |
+| -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in words per minute. Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n `num`   | numstart=`num`       |               | Start presenting from the nth word. Minimum value of 1. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
@@ -69,7 +69,17 @@ The default values are stored in [`./default.rc`](./default.rc), which is used a
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
 | -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from 0 to 255. |
+| -B         | breakposix=`bool`    |               | Break POSIX compliance in order to improve performance. Discussed further in the 'Breaking POSIX compliance' section. |
 | -v         |                      |               | Print tspreed version and exit. |
+
+
+## Breaking POSIX compliance
+
+tspreed is intended to be a POSIX-compliant shell script to ensure portability across Unix-like systems as much as possible. In order to accomodate this, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can safely be enabled if your system supports the following functionality:
+
+* `sleep(1)` is able to use a floating point number for the time operand. This functionality is present in GNU sleep, used by GNU/Linux, and in BSD sleep, used by macOS and BSD.
+
+If tspreed was installed via a package manager and your system supports the required functionality, the package maintainter may have chosen to enable the 'breakposix' option in the default configuration.
 
 ## Contributing
 

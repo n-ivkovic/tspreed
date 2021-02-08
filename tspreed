@@ -13,7 +13,7 @@ endTput() {
 # Handle exit from signals 
 catchExit() {
 	endTput
-	! [ "$quietexit" = true ] && [ -n "$wordnum" ] && [ -n "$wordstotal" ] && echo "$wordnum/$wordstotal"
+	! [ "$quietexit" = true ] && echo "$wordnum/$wordstotal"
 	exit 2
 }
 
@@ -29,10 +29,21 @@ initOutput() {
 	[ "$focus" = true ] && tput cup $(( termycenter-1 )) $termxcenter && printf "%s" "$pt1" && tput cup $(( termycenter+1 )) $termxcenter && printf "%s" "$pt2"
 }
 
+# Get current timestamp in ms
+getDate() {
+	echo $(( $(date +%s%N/1000000) ))
+}
+
 # Perform floating point calculation
 # $1 Calculation to perform
 calcFloat() {
 	awk "BEGIN { print $1 }"
+}
+
+# Floor float to int
+# $1 Float to floor
+floorFloat() {
+	echo "${1%.*}"
 }
 
 # Exit showing man refer
@@ -42,7 +53,7 @@ exitRefer() {
 
 # Exit showing command usage
 exitUsage() {
-	echo "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]" && exitRefer
+	echo "Usage: tspreed [-lqhifbBv] [-w wpm] [-n num] [-p style] [-c color]" && exitRefer
 }
 
 # Catch signals
@@ -60,7 +71,7 @@ localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$localconfig" ] && . "$localconfig"
 
 # Get passed args
-while getopts ":w:n:qhilfp:bc:v" opt; do
+while getopts ":w:n:qhilfp:bc:Bv" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG;;
 		n) numstart="$OPTARG";;
@@ -72,7 +83,8 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) echo "tspreed 1.2.3" && exit 0;;
+		B) breakposix=true;;
+		v) echo "tspreed 2.0.0" && exit 0;;
 		\?) echo "Invalid option '-$OPTARG'" && exitUsage;;
 		:) echo "Option -$OPTARG requires an argument." && exitUsage;;
 	esac
@@ -80,8 +92,7 @@ done
 
 # Validate and set word speed
 [ -z "$wpm" ] && echo "Words per minute not set" && exitRefer
-! [ "$wpm" -ge 1 ] 2> /dev/null && echo "Invalid wpm '$wpm'" && exitRefer
-defaultdelay=$(calcFloat "1/($wpm/60)")
+! { [ "$wpm" -ge 1 ] && [ "$wpm" -le 60000 ]; } 2> /dev/null && echo "Invalid wpm '$wpm'" && exitRefer
 # Validate and set nth word as starting word
 [ -n "$numstart" ] && ! [ "$numstart" -ge 1 ] 2> /dev/null && echo "Invalid starting word position '$numstart'" && exitRefer 
 [ -z "$numstart" ] && numstart=1
@@ -112,12 +123,13 @@ wordlenaverage=5 # Based on average English word length of 5.1 letters
 wordstotal=$(echo "$input" | wc -w | tr -d "[:space:]")
 wordnum=0
 firstword=true
+startdate=
 
 # Present
 for word in $input; do
 	# Init word 
+	startdate=$(getDate)
 	wordnum=$(( wordnum+1 ))
-	# Skip if before starting word
 	[ "$wordnum" -lt "$numstart" ] && continue
 	wordlen=${#word}
 
@@ -155,14 +167,26 @@ for word in $input; do
 	# Move cursor to bottom left
 	tput cup "$termheight" 0
 
-	# Set delay between words
-	delay="$defaultdelay"
+	# Set sleep time (ms)
+	sleeptime=$(calcFloat "1000/($wpm/60)") && sleeptimeint=$(floorFloat "$sleeptime")
 	if [ "$firstword" = true ]; then
-		firstword=false && delay=1
+		firstword=false && [ "$sleeptimeint" -lt 1000 ] && sleeptime=1000 && sleeptimeint=1000
 	elif [ "$lengthvary" = true ]; then
-		[ "$wordlen" -gt "$wordlenaverage" ] && delay=$(calcFloat "$delay*($wordlen/$wordlenaverage)") || delay=$(calcFloat "$delay*($wordlen/($wordlen+1))")
+		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime=$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)") || sleeptime=$(calcFloat "$sleeptime*($wordlen/($wordlen+1))")
+		sleeptimeint=$(floorFloat "$sleeptime")
 	fi
-	sleep "$delay"
+	# Sleep
+	wordtime=$(( $(getDate)-startdate ))
+	if [ "$sleeptimeint" -gt "$wordtime" ]; then
+		if [ "$breakposix" = true ]; then
+			sleep "$(calcFloat "($sleeptime-$wordtime)/1000")"
+		else
+			sleepdate=$(( $(getDate)+sleeptimeint-wordtime ))
+			while [ "$(getDate)" -lt "$sleepdate" ]; do
+				:
+			done
+		fi
+	fi
 
 	# Re-init output if word length exceeds terminal width
 	[ "$wordlenexceed" = true ] && [ "$wordnum" -lt "$wordstotal" ] && initOutput
