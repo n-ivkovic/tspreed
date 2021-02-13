@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-02-09 tspreed
+.TH tspreed 1 2021-02-14 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -49,7 +49,7 @@ Display the focus letter in bold. Only takes effect if focus letter highlighting
 Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from \fI0\fR to \fI255\fR.
 .TP
 .B -B
-Break POSIX compliance in order to improve performance. Discussed further in the 'Breaking POSIX compliance' section.
+Break POSIX compliance in order to improve performance. This will be enabled in the global config during installation if your system supports the required non-compliant functionality. Discussed further in the 'Breaking POSIX compliance' section.
 .TP
 .B -v
 Print tspreed version and exit.
@@ -109,24 +109,26 @@ User-specific configuration is located within the directory defined. If \fB$XDG_
 .SH FILES
 .TP
 .B \fI/etc/tspreed/tspreed.rc\fR
-System-wide configuration file.
+Global configuration file.
 .TP
 .B \f(BI$XDG_CONFIG_HOME\fI/tspreed/tspreed.rc\fR
-User-specific configuration file.
+Local configuration file.
 
 .SH EXAMPLES
 .P
 $ \fBtspreed < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifbB -p line -c 1\fR
 
 .SH BREAKING POSIX COMPLIANCE
-\fBtspreed\fR is intended to be a POSIX-compliant shell script to ensure portability across Unix-like systems as much as possible. In order to accomodate this, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can safely be enabled if your system supports the following functionality:
+\fBtspreed\fR intends to conform to IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001) as much as possible to ensure portability across Unix-like systems. In order to remain as compliant as possible, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can safely be enabled if your system supports the following functionality:
 .TP
-\fIsleep(1)\fR is able to use a floating point number for the time operand.
+\fBsleep\fR(1) is able to use a floating point number for the time operand.
 This functionality is present in GNU sleep, used by GNU/Linux, and in BSD sleep, used by macOS and BSD.
 .P
-If \fBtspreed\fR was installed via a package manager and your system supports the required functionality, the package maintainter may have chosen to enable the 'breakposix' option in the default configuration.
+The 'breakposix' option will be enabled in the global config during installation if your system supports the required non-compliant functionality.
+
+It is reccomended to enable this option if possible as this will significantly improve the performance of the script.
 
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.

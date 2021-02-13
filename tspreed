@@ -21,17 +21,17 @@ catchExit() {
 initOutput() {
 	tput clear
 	# Set terminal-based vars
-	termheight=$(tput lines)
-	termwidth=$(tput cols)
-	termxcenter=$(( termwidth/2 ))
-	termycenter=$(( termheight/2 ))
+	termheight=$([ -n "$LINES" ] && echo "$LINES" || tput lines)
+	termwidth=$([ -n "$COLUMNS" ] && echo "$COLUMNS" || tput cols)
+	termxcenter=$((termwidth/2))
+	termycenter=$((termheight/2))
 	# Output pointers
-	[ "$focus" = true ] && tput cup $(( termycenter-1 )) $termxcenter && printf "%s" "$pt1" && tput cup $(( termycenter+1 )) $termxcenter && printf "%s" "$pt2"
+	[ "$focus" = true ] && tput cup $((termycenter-1)) $termxcenter && printf "%s" "$pt1" && tput cup $((termycenter+1)) $termxcenter && printf "%s" "$pt2"
 }
 
 # Get current timestamp in ms
 getDate() {
-	echo $(( $(date +%s%N/1000000) ))
+	echo $(($(date +%s%N)/1000000))
 }
 
 # Perform floating point calculation
@@ -71,7 +71,8 @@ localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$localconfig" ] && . "$localconfig"
 
 # Get passed args
-while getopts ":w:n:qhilfp:bc:Bv" opt; do
+while getopts ":w:n:qhilfp:bc:Bv" opt
+do
 	case "$opt" in
 		w) wpm=$OPTARG;;
 		n) numstart="$OPTARG";;
@@ -129,7 +130,7 @@ startdate=
 for word in $input; do
 	# Init word 
 	startdate=$(getDate)
-	wordnum=$(( wordnum+1 ))
+	wordnum=$((wordnum+1))
 	[ "$wordnum" -lt "$numstart" ] && continue
 	wordlen=${#word}
 
@@ -144,12 +145,12 @@ for word in $input; do
 			*)           focusindex=5;;
 		esac
 		# Determine if word length exceeds terminal width
-		[ $(( wordlen+termxcenter-focusindex+1 )) -gt "$termwidth" ] && wordlenexceed=true
+		[ $((wordlen+termxcenter-focusindex+1)) -gt "$termwidth" ] && wordlenexceed=true
 		# Set horizontal position of word
-		wordx=$(( termxcenter-focusindex+1 ))
+		wordx=$((termxcenter-focusindex+1))
 		# Highlight focus letter
-		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$(( focusindex - 1 )))
-		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $(( focusindex + 1 ))-"$wordlen")
+		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$((focusindex - 1)))
+		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $((focusindex + 1))-"$wordlen")
 		focusletter=$(echo "$word" | cut -c "$focusindex")
 		[ "$focusbold" = true ] && focusletter="$(tput bold)$focusletter"
 		[ -n "$focuscolor" ] && focusletter="$(tput setaf "$focuscolor")$focusletter"
@@ -157,13 +158,13 @@ for word in $input; do
 		word="$wordstart$focusletter$wordend"
 	else
 		# Set horizontal position of word
-		[ $(( wordlen+termxcenter-(wordlen/2) )) -gt "$termwidth" ] && wordlenexceed=true && wordx=0 || wordx=$(( termxcenter-(wordlen/2) ))
+		[ $((wordlen+termxcenter-(wordlen/2))) -gt "$termwidth" ] && wordlenexceed=true && wordx=0 || wordx=$((termxcenter-(wordlen/2)))
 	fi
 
 	# Output word
 	tput cup $termycenter 0 && tput el && tput cup $termycenter $wordx && printf "%s" "$word"
 	# Output presentation information
-	[ "$proginfo" = true ] && tput cup home && tput el && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(( (wordnum*100)/wordstotal ))"
+	[ "$proginfo" = true ] && tput cup home && tput el && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(((wordnum*100)/wordstotal))"
 	# Move cursor to bottom left
 	tput cup "$termheight" 0
 
@@ -172,16 +173,16 @@ for word in $input; do
 	if [ "$firstword" = true ]; then
 		firstword=false && [ "$sleeptimeint" -lt 1000 ] && sleeptime=1000 && sleeptimeint=1000
 	elif [ "$lengthvary" = true ]; then
-		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime=$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)") || sleeptime=$(calcFloat "$sleeptime*($wordlen/($wordlen+1))")
+		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime=$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)") || sleeptime=$(calcFloat "$sleeptime*(($wordlenaverage-1)/$wordlenaverage)")
 		sleeptimeint=$(floorFloat "$sleeptime")
 	fi
 	# Sleep
-	wordtime=$(( $(getDate)-startdate ))
+	wordtime=$(($(getDate)-startdate))
 	if [ "$sleeptimeint" -gt "$wordtime" ]; then
 		if [ "$breakposix" = true ]; then
 			sleep "$(calcFloat "($sleeptime-$wordtime)/1000")"
 		else
-			sleepdate=$(( $(getDate)+sleeptimeint-wordtime ))
+			sleepdate=$(($(getDate)+sleeptimeint-wordtime))
 			while [ "$(getDate)" -lt "$sleepdate" ]; do
 				:
 			done

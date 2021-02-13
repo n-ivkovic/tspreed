@@ -48,14 +48,14 @@ To use, pipe plain text into tspreed.
 $ tspreed < textfile
 ```
 ```	
-$ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
+$ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifbB -p line -c 1
 ```
 
 ## Configuration
 
-The values provided in the command options take precidence over the values of the user-specific config file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precidence over the values of the system-wide config file `/etc/tspreed/tspreed.rc`.
+The values provided in the command options take precidence over the values of the local config file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precidence over the values of the global config file `/etc/tspreed/tspreed.rc`.
 
-The default values are stored in [`./default.rc`](./default.rc), which is used as the system-wide config file after installation.
+The default values are stored in [`./default.rc`](./default.rc), which is installed as the global config during installation.
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
@@ -69,23 +69,24 @@ The default values are stored in [`./default.rc`](./default.rc), which is used a
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
 | -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from 0 to 255. |
-| -B         | breakposix=`bool`    |               | Break POSIX compliance in order to improve performance. Discussed further in the 'Breaking POSIX compliance' section. |
+| -B         | breakposix=`bool`    | true (if supported) | Break POSIX compliance in order to improve performance. This will be enabled in the global config during installation if your system supports the required non-compliant functionality. Discussed further in the 'Breaking POSIX compliance' section. |
 | -v         |                      |               | Print tspreed version and exit. |
-
 
 ## Breaking POSIX compliance
 
-tspreed is intended to be a POSIX-compliant shell script to ensure portability across Unix-like systems as much as possible. In order to accomodate this, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can safely be enabled if your system supports the following functionality:
+tspreed intends to conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible to ensure portability across Unix-like systems. In order to remain as compliant as possible, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can be enabled if your system supports the following functionality:
 
 * `sleep(1)` is able to use a floating point number for the time operand. This functionality is present in GNU sleep, used by GNU/Linux, and in BSD sleep, used by macOS and BSD.
 
-If tspreed was installed via a package manager and your system supports the required functionality, the package maintainter may have chosen to enable the 'breakposix' option in the default configuration.
+The 'breakposix' option will be enabled in the global config during installation if your system supports the required non-compliant functionality.
+
+It is reccomended to enable this option if possible as this will significantly improve the performance of the script.
 
 ## Contributing
 
 Please attempt to adhere to the following when creating a pull request:
 
-* Ensure all shell script written is POSIX-compliant. This can be checked using [ShellCheck](https://www.shellcheck.net/). Ensure ShellCheck gives no addtional warnings when the changes made are checked compared to any warnings given when the `develop` branch is checked. If there are additional warnings please provide a justificaition.
+* Ensure all changes conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible. [ShellCheck](https://www.shellcheck.net/) can be used to check basic POSIX-compliance and script correctness. Ensure ShellCheck gives no addtional warnings when the changes made are checked compared to any warnings given when the `develop` branch is checked. If there are additional warnings please provide a justificaition.
 * Ensure all indentation is done with a single tab per indent.
 * Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
 
