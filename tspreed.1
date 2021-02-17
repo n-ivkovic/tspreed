@@ -1,11 +1,11 @@
-.TH tspreed 1 2021-02-14 tspreed
+.TH tspreed 1 2021-02-18 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
-[\fB\-lqhifbBv\fR]
+[\fB\-lqhifbv\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
 [\fB\-p\fR \fIstyle\fR]
@@ -46,10 +46,7 @@ Display pointers in a given style pointing towards the focus letter. Only takes 
 Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
 .TP
 .B -c \fIcolor\fR
-Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from \fI0\fR to \fI255\fR.
-.TP
-.B -B
-Break POSIX compliance in order to improve performance. This will be enabled in the global config during installation if your system supports the required non-compliant functionality. Discussed further in the 'Breaking POSIX compliance' section.
+Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 8-bit color values, ranging from \fI0\fR to \fI255\fR.
 .TP
 .B -v
 Print tspreed version and exit.
@@ -86,20 +83,23 @@ Equivalent to \fB-b\fR option.
 .TP
 .B focuscolor=\fIcolor\fR
 Equivalent to \fB-c\fR option.
-.TP
-.B breakposix=\fIbool\fR
-Equivalent to \fB-B\fR option.
 
 .SH EXIT STATUS
 .TP
 .B 0
-Successful completion of presentation.
+Success.
 .TP
 .B 1
-Failure during initiation of presentation.
+Failure due to incorrect options/configuration.
 .TP
 .B 2
-Presentation terminated before completion.
+Failure due to system not supporting required functionalities that are not POSIX-compliant.
+.TP
+.B 3
+Failure due to terminal/terminal emulator not supporting required capabilities.
+.TP
+.B 8
+Presentation terminated before completion - no failure.
 
 .SH ENVIRONMENT
 .TP
@@ -108,27 +108,57 @@ User-specific configuration is located within the directory defined. If \fB$XDG_
 
 .SH FILES
 .TP
-.B \fI/etc/tspreed/tspreed.rc\fR
+.I /etc/tspreed/tspreed.rc
 Global configuration file.
 .TP
-.B \f(BI$XDG_CONFIG_HOME\fI/tspreed/tspreed.rc\fR
+.I \f(BI$XDG_CONFIG_HOME\fI/tspreed/tspreed.rc
 Local configuration file.
 
 .SH EXAMPLES
 .P
 $ \fBtspreed < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifbB -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
-.SH BREAKING POSIX COMPLIANCE
-\fBtspreed\fR intends to conform to IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001) as much as possible to ensure portability across Unix-like systems. In order to remain as compliant as possible, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can safely be enabled if your system supports the following functionality:
+.SH PORTABILITY 
+\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on any other Unix-like system or portability is not treated as a priority, however this does mean compatibility is not guarenteed on unsupported systems.
+
+.B POSIX
+
+\fBtspreed\fR attempts to adhere to IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
+
+The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the script must utilize is the '%N' format in \fBdate\fR(1). The script will exit with an error if this functionality is not supported by the system.
+
+.B TERMINAL CAPABILITIES
+
+\fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) which no standard can guarantee the support of. Desipite this, the capabilities utilized are well-supported by terminal emulators and should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators. Listed below are the terminal capabilities utilized by the script.
 .TP
-\fBsleep\fR(1) is able to use a floating point number for the time operand.
-This functionality is present in GNU sleep, used by GNU/Linux, and in BSD sleep, used by macOS and BSD.
-.P
-The 'breakposix' option will be enabled in the global config during installation if your system supports the required non-compliant functionality.
-
-It is reccomended to enable this option if possible as this will significantly improve the performance of the script.
+\fBlines\fR
+.TP
+\fBcols\fR
+.TP
+\fBsgr0\fR
+Only utilized if focusbold is enabled or focuscolor is set.
+.TP
+\fBbold\fR
+Only utilized if focusbold is enabled.
+.TP
+\fBel\fR
+.TP
+\fBcup\fR
+.TP
+\fBsetaf\fR
+Only utilized if focuscolor is set.
+.TP
+\fBcnorm\fR
+Only utilized if hidecursor is enabled.
+.TP
+\fBcivis\fR
+Only utilized if hidecursor is enabled.
+.TP
+\fBrmcup\fR
+.TP
+\fBsncup\fR
 
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.

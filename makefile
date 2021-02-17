@@ -23,8 +23,6 @@ install:
 	@mkdir -p $(BINDIR) && cp $(EXEC) $(BIN) && chmod 755 $(BIN) && echo "Installed $(BIN)"
 	@mkdir -p $(MANDIR) && cp $(EXEC).1 $(MAN) && chmod 644 $(MAN) && echo "Installed $(MAN)"
 	@[ ! -f "$(CONF)" ] && mkdir -p $(CONFDIR) && cp default.rc $(CONF) && chmod 644 $(CONF) && echo "Installed $(CONF)"
-# Enable breakposix in global config if required functionality is supported
-	-@sleep 0.0 2> /dev/null && echo "breakposix=true" >> $(CONF) && echo "NOTE: The 'breakposix' option has been enabled in the global config. This will significantly improve the performance of the script."
 
 uninstall:
 	@rm -f $(BIN) && echo "Uninstalled $(BIN)"

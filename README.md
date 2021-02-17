@@ -19,7 +19,7 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 #### Install
 
-Replace github.com with gitlab.com if using GitLab
+Replace github.com with gitlab.com if using GitLab.
 ```
 $ git clone https://github.com/n-ivkovic/tspreed
 $ cd tspreed
@@ -48,7 +48,7 @@ To use, pipe plain text into tspreed.
 $ tspreed < textfile
 ```
 ```	
-$ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifbB -p line -c 1
+$ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
 ```
 
 ## Configuration
@@ -68,19 +68,34 @@ The default values are stored in [`./default.rc`](./default.rc), which is instal
 | -f         | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI 8-bit standard color values, ranging from 0 to 255. |
-| -B         | breakposix=`bool`    | true (if supported) | Break POSIX compliance in order to improve performance. This will be enabled in the global config during installation if your system supports the required non-compliant functionality. Discussed further in the 'Breaking POSIX compliance' section. |
+| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
 | -v         |                      |               | Print tspreed version and exit. |
 
-## Breaking POSIX compliance
+## Portability
 
-tspreed intends to conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible to ensure portability across Unix-like systems. In order to remain as compliant as possible, less efficiant solutions are utilized in the script. More efficiant, but non-compliant, solutions can be utilized instead by enabling the 'breakposix' option listed in the Configuration section. This option can be enabled if your system supports the following functionality:
+tspreed 'officially' supports GNU-based systems and BSD-based systems (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on any other Unix-like system or portability is not treated as a priority, however this does mean compatibility is not guarenteed on unsupported systems.
 
-* `sleep(1)` is able to use a floating point number for the time operand. This functionality is present in GNU sleep, used by GNU/Linux, and in BSD sleep, used by macOS and BSD.
+### POSIX
 
-The 'breakposix' option will be enabled in the global config during installation if your system supports the required non-compliant functionality.
+tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
 
-It is reccomended to enable this option if possible as this will significantly improve the performance of the script.
+The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the script must utilize is the '%N' format in `date(1)`. The script will exit with an error if this functionality is not supported by the system.
+
+### Terminal capabilities
+
+tspreed utilizes terminal capabilities via `tput(1)` which no standard can guarantee the support of. Desipite this, the capabilities utilized are well-supported by terminal emulators and should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators. Listed below are the terminal capabilities utilized by the script.
+
+* `lines`
+* `cols`
+* `sgr0` - Only utilized if focusbold is enabled or focuscolor is set
+* `bold` - Only utilized if focusbold is enabled
+* `el`
+* `cup`
+* `setaf` - Only utilized if focuscolor is set
+* `cnorm` - Only utilized if hidecursor is enabled
+* `civis` - Only utilized if hidecursor is enabled
+* `rmcup`
+* `sncup`
 
 ## Contributing
 
