@@ -121,7 +121,7 @@ $ \fBtspreed < textfile\fR
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
 .SH PORTABILITY 
-\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on any other Unix-like system or portability is not treated as a priority, however this does mean compatibility is not guarenteed on unsupported systems.
+\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
 .B POSIX
 
@@ -131,7 +131,9 @@ The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the scr
 
 .B TERMINAL CAPABILITIES
 
-\fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) which no standard can guarantee the support of. Desipite this, the capabilities utilized are well-supported by terminal emulators and should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators. Listed below are the terminal capabilities utilized by the script.
+\fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) which no standard can guarantee the support of. However, the vast majority of terminals that support ANSI X3.64 escape codes, which have been well-supported since the 1980s, usually map the escape codes to the capabilities utilized, except \fBrmcup\fR and \fBsmcup\fR. This means the capabilities utilized should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators.
+
+Listed below are the terminal capabilities utilized by the script.
 .TP
 \fBlines\fR
 .TP

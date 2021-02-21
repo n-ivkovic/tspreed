@@ -73,7 +73,7 @@ The default values are stored in [`./default.rc`](./default.rc), which is instal
 
 ## Portability
 
-tspreed 'officially' supports GNU-based systems and BSD-based systems (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on any other Unix-like system or portability is not treated as a priority, however this does mean compatibility is not guarenteed on unsupported systems.
+tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
 ### POSIX
 
@@ -83,25 +83,33 @@ The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the scr
 
 ### Terminal capabilities
 
-tspreed utilizes terminal capabilities via `tput(1)` which no standard can guarantee the support of. Desipite this, the capabilities utilized are well-supported by terminal emulators and should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators. Listed below are the terminal capabilities utilized by the script.
+tspreed utilizes terminal capabilities via `tput(1)` which no standard can guarantee the support of. However, the vast majority of terminals that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes, which have been well-supported since the 1980s, usually map the escape codes to the capabilities utilized, except `rmcup` and `smcup`. This means the capabilities utilized should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators.
+
+Listed below are the terminal capabilities utilized by the script.
 
 * `lines`
 * `cols`
-* `sgr0` - Only utilized if focusbold is enabled or focuscolor is set
-* `bold` - Only utilized if focusbold is enabled
+* `sgr0` - Only utilized if focusbold is enabled or focuscolor is set.
+* `bold` - Only utilized if focusbold is enabled.
 * `el`
 * `cup`
-* `setaf` - Only utilized if focuscolor is set
-* `cnorm` - Only utilized if hidecursor is enabled
-* `civis` - Only utilized if hidecursor is enabled
+* `setaf` - Only utilized if focuscolor is set.
+* `cnorm` - Only utilized if hidecursor is enabled.
+* `civis` - Only utilized if hidecursor is enabled.
 * `rmcup`
-* `sncup`
+* `smcup`
+
+## Todo
+
+* Add fallback method for when `rmcup` and/or `smcup` terminal capabilities are not supported.
+* Pause/resume and forward/back as suggested [here](https://github.com/n-ivkovic/tspreed/issues/3).
 
 ## Contributing
 
 Please attempt to adhere to the following when creating a pull request:
 
-* Ensure all changes conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible. [ShellCheck](https://www.shellcheck.net/) can be used to check basic POSIX-compliance and script correctness. Ensure ShellCheck gives no addtional warnings when the changes made are checked compared to any warnings given when the `develop` branch is checked. If there are additional warnings please provide a justificaition.
+* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [./tspreed](./tspreed) and [./default.rc](./default.rc) via the online checker (note: SC2148 and SC2034 will be thrown when checking ./default.rc via the online checker, this is expected and ok). If the changes made create errors/warnings please provide a justification.
+* Ensure all changes conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible.
 * Ensure all indentation is done with a single tab per indent.
 * Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
 

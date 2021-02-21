@@ -4,57 +4,70 @@
 # Licensed under the GNU General Public License version 3 or later. See ./LICENSE, or <https://gnu.org/licenses/gpl.html> if more recent, for details.
 # This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
+# Notes about disabled ShellChecks:
+#   SC2059 -- Disabled where escape sequences are intended to be interpreted
+#   SC1090 -- Config files do not need to/cannot be checked as they are user-written. Default config is checked separately
+
 # Exit with error message
 # $1 return value
 # $2 error message
 exitMsg() {
-	[ -n "$2" ] && { [ "$1" -eq 3 ] && echo "Terminal does not support capability '$2'" || echo "$2"; } >&2
-	[ "$1" -eq 1 ] && echo "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]" >&2
-	echo "See 'man tspreed'" >&2
+	[ -n "$2" ] && { [ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" || printf "%s\n" "$2"; } >&2
+	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]\n" >&2
+	printf "See 'man tspreed'\n" >&2
 	exit "$1"
 }
 
 # Get terminal foreground color escape sequence
 # $1 color
 getTermColor() {
-	tput setaf "$1" 2> /dev/null || exitMsg 3 "setaf"
+	tput setaf "$1" 2>/dev/null || exitMsg 3 "setaf"
 }
 
 # Move cursor to position
 # $1 row
 # $2 column
 termMove() {
-	tput cup "$1" "$2" 2> /dev/null || exitMsg 3 "cup"
+	tput cup "$1" "$2" 2>/dev/null || exitMsg 3 "cup"
 }
 
 # Initialise tput output
 initTerm() {
 	tput clear
+
 	# Set term info
-	termheight=$(tput lines 2> /dev/null) && [ -z "$termheight" ] && exitMsg 3 "lines"
-	termwidth=$(tput cols 2> /dev/null) && [ -z "$termwidth" ] && exitMsg 3 "cols"
+	termheight="$(tput lines 2>/dev/null)" || exitMsg 3 "lines"
+	termwidth="$(tput cols 2>/dev/null)" || exitMsg 3 "cols"
 	termxcenter=$((termwidth/2))
 	termycenter=$((termheight/2))
+
 	# Output pointers
-	[ "$focus" = true ] && termMove "$((termycenter-1))" "$termxcenter" && printf "%s" "$pt1" && termMove "$((termycenter+1))" "$termxcenter" && printf "%s" "$pt2"
+	if [ "$focus" = true ]; then
+		termMove "$((termycenter-1))" "$termxcenter" && printf "%s" "$pt1"
+		termMove "$((termycenter+1))" "$termxcenter" && printf "%s" "$pt2"
+	fi
 }
 
 # Finish tput session
 endTput() {
-	tput rmcup 2> /dev/null || exitMsg 3 "rmcup"
-	[ "$hidecursor" = true ] && { tput cnorm 2> /dev/null || exitMsg 3 "cnorm"; }
+	tput rmcup 2>/dev/null || exitMsg 3 "rmcup"
+	[ "$hidecursor" = true ] && { tput cnorm 2>/dev/null || exitMsg 3 "cnorm"; }
 }
 
 # Handle exit from signals 
 catchExit() {
 	endTput
-	! [ "$quietexit" = true ] && echo "$wordnum/$wordstotal"
+	! [ "$quietexit" = true ] && printf "%s/%s\n" "$wordnum" "$wordstotal"
 	exit 8
 }
 
 # Get current epoch timestamp in milliseconds
 getDate() {
-	[ "$nonposixdate" = true ] && echo "$(($(date -u "+%s%N/1000000")))" || echo "$(($(printf "%.0f" "$(date -u "+%S")") + $(printf "%.0f" "$(date -u "+%M")")$(date -u "+*60+%k*3600+(")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+-1)*86400+((%Y-1900)-70)*31536000+(((%Y-1900)-69)/4)*86400-(((%Y-1900)-1)/100)*86400+(((%Y-1900)+299)/400)*86400%N/1000000")))"
+	if [ "$nonposixdate" = true ]; then
+		printf "%s" "$(($(date -u "+%s%N/1000000")))"
+	else
+		printf "%s" "$(($(printf "%.0f" "$(date -u "+%S")")+$(printf "%.0f" "$(date -u "+%M")")$(date -u "+*60+%k*3600+(")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+-1)*86400+((%Y-1900)-70)*31536000+(((%Y-1900)-69)/4)*86400-(((%Y-1900)-1)/100)*86400+(((%Y-1900)+299)/400)*86400%N/1000000")))"
+	fi
 }
 
 # Perform floating point calculation
@@ -69,7 +82,7 @@ trap "catchExit" 3    # SIGQUIT
 trap "catchExit" 6    # SIGABRT
 trap "catchExit" 14   # SIGALRM
 trap "catchExit" 15   # SIGTERM
-trap "initTerm" WINCH # Terminal resize
+trap "initTerm" WINCH # Terminal emulator resize
 
 # Import configs
 globalconfig="/etc/tspreed/tspreed.rc"
@@ -79,9 +92,8 @@ localconfig="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 # shellcheck disable=SC1090
 [ -f "$localconfig" ] && . "$localconfig"
 
-# Get passed args
-while getopts ":w:n:qhilfp:bc:v" opt
-do
+# Get passed options
+while getopts ":w:n:qhilfp:bc:v" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG;;
 		n) numstart="$OPTARG";;
@@ -93,7 +105,7 @@ do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) echo "tspreed 2.0.0" && exit 0;;
+		v) printf "tspreed 2.0.0\n" && exit 0;;
 		\?) exitMsg 1 "Invalid option '-$OPTARG'";;
 		:) exitMsg 1 "Option -$OPTARG requires an argument.";;
 	esac
@@ -101,31 +113,37 @@ done
 
 # Validate word speed
 [ -z "$wpm" ] && exitMsg 1 "Words per minute not set"
-! { [ "$wpm" -ge 1 ] && [ "$wpm" -le 60000 ]; } 2> /dev/null && exitMsg 1 "Invalid wpm '$wpm'"
+! { [ "$wpm" -ge 1 ] && [ "$wpm" -le 60000 ]; } 2>/dev/null && exitMsg 1 "Invalid wpm '$wpm'"
+
 # Validate and set nth word as starting word
-[ -n "$numstart" ] && ! [ "$numstart" -ge 1 ] 2> /dev/null && exitMsg 1 "Invalid starting word position '$numstart'"
+[ -n "$numstart" ] && ! [ "$numstart" -ge 1 ] 2>/dev/null && exitMsg 1 "Invalid starting word position '$numstart'"
 [ -z "$numstart" ] && numstart=1
+
 # Validate focus letter options
 if [ "$focus" = true ]; then
+
 	# Validate and set focus letter pointers
-	pt1=" " && pt2=" "
+	pt1= && pt2=
 	[ -n "$focuspointer" ] && [ "$focuspointer" != "none" ] && case "$focuspointer" in
 		line) pt1="|" && pt2="|";;
 		point) pt1="v" && pt2="^";;
 		*) exitMsg 1 "Invalid focus letter pointer '$focuspointer'";;
 	esac
+
 	# Validate focus letter color
-	[ -n "$focuscolor" ] && ! { [ "$focuscolor" -ge 0 ] && [ "$focuscolor" -le 255 ]; } 2> /dev/null && exitMsg 1 "Invalid focus letter color '$focuscolor'"
+	[ -n "$focuscolor" ] && ! { [ "$focuscolor" -ge 0 ] && [ "$focuscolor" -le 255 ]; } 2>/dev/null && exitMsg 1 "Invalid focus letter color '$focuscolor'"
+
 fi
 
 # Test non-POSIX features
-[ "$(date "+%N" 2> /dev/null)" = "%N" ] && exitMsg 2 "System does not support required date(1) format '%N'"
-nonposixsleep=$(sleep 0.0 2> /dev/null && echo "true" || echo "false")
-nonposixdate=$(! [ "$(date "+%s" 2> /dev/null)" = "%s" ] && echo "true" || echo "false")
+[ "$(date "+%N" 2>/dev/null)" = "%N" ] && exitMsg 2 "System does not support required date(1) format '%N'"
+nonposixsleep=$(sleep 0.0 2>/dev/null && printf "true" || printf "false")
+nonposixdate=$(! [ "$(date "+%s" 2>/dev/null)" = "%s" ] && printf "true" || printf "false")
+
 # Set term capabilties
-termclearline="$(tput el 2> /dev/null)" && [ -z "$termclearline" ] && exitMsg 3 "el"
-[ "$focusbold" = true ] && termbold="$(tput bold 2> /dev/null)" && [ -z "$termbold" ] && exitMsg 3 "bold"
-{ [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && termreset="$(tput sgr0 2> /dev/null)" && [ -z "$termreset" ] && exitMsg 3 "sgr0"
+termclearline="$(tput el 2>/dev/null)" || exitMsg 3 "el"
+[ "$focusbold" = true ] && { termbold="$(tput bold 2>/dev/null)" || exitMsg 3 "bold"; }
+{ [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && { termreset="$(tput sgr0 2>/dev/null)" || exitMsg 3 "sgr0"; }
 
 # Get input
 input=
@@ -134,25 +152,27 @@ while read -r inp; do
 done
 
 # Init presentation
-tput smcup 2> /dev/null || exitMsg 3 "smcup"
-[ "$hidecursor" = true ] && { tput civis 2> /dev/null || exitMsg 3 "civis"; }
+tput smcup 2>/dev/null || exitMsg 3 "smcup"
+[ "$hidecursor" = true ] && { tput civis 2>/dev/null || exitMsg 3 "civis"; }
 initTerm
 wordlenaverage=5 # Based on average English word length of 5.1 letters
-wordstotal=$(echo "$input" | wc -w | tr -d "[:space:]")
+wordstotal=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 wordnum=0
 firstword=true
 
 # Present
 for word in $input; do
+
 	# Init word 
-	startdate=$(getDate)
-	wordnum=$((wordnum+1))
+	startdate="$(getDate)"
+	wordnum="$((wordnum+1))"
 	[ "$wordnum" -lt "$numstart" ] && continue
 	wordlen=${#word}
 
-	# Focus letter highlighting
+	# Focus letter highlighting enabled
 	if [ "$focus" = true ]; then
-		# Find index of focus letter
+
+		# Set index of focus letter
 		case "$wordlen" in
 			1|2)         focusindex=1;;
 			3|4|5)       focusindex=2;;
@@ -160,40 +180,69 @@ for word in $input; do
 			10|11|12|13) focusindex=4;;
 			*)           focusindex=5;;
 		esac
-		# Determine if word length exceeds terminal width
-		[ $((wordlen+termxcenter-focusindex+1)) -gt "$termwidth" ] && wordlenexceed=true
+
+		# Determine if word exceeds terminal width
+		[ $((wordlen+termxcenter-focusindex+1)) -gt "$termwidth" ] && wordlenexceed=true || wordlenexceed=false
 		# Set horizontal position of word
 		wordx=$((termxcenter-focusindex+1))
-		# Get sections of word
-		wordstart=$([ "$focusindex" -gt 1 ] && echo "$word" | cut -c 1-$((focusindex - 1)))
-		wordend=$([ "$wordlen" -gt 1 ] && echo "$word" | cut -c $((focusindex + 1))-"$wordlen")
-		focusletter=$(echo "$word" | cut -c "$focusindex")
-		# Highlight focus letter
-		[ "$focusbold" = true ] && focusletter="$termbold$focusletter"
-		[ -n "$focuscolor" ] && focusletter="$(getTermColor "$focuscolor")$focusletter"
-		[ "${#focusletter}" -ne 1 ] && focusletter="$focusletter$termreset"
-		# Combine sections of word
-		word="$wordstart$focusletter$wordend"
+
+		# Get word sections
+		wordstart=$([ "$focusindex" -gt 1 ] && printf "%s" "$word" | cut -c 1-$((focusindex - 1)) || printf "")
+		wordfocus=$(printf "%s" "$word" | cut -c "$focusindex")
+		wordend=$([ "$wordlen" -gt 1 ] && printf "%s" "$word" | cut -c $((focusindex + 1))-"$wordlen" || printf "")
+
+		# Print word
+		# shellcheck disable=SC2059
+		termMove "$termycenter" 0 && printf "$termclearline" && termMove "$termycenter" "$wordx"
+		printf "%s" "$wordstart"
+		# shellcheck disable=SC2059
+		[ "$focusbold" = true ] && printf "$termbold"
+		# shellcheck disable=SC2059
+		[ -n "$focuscolor" ] && printf "$(getTermColor "$focuscolor")"
+		printf '%s' "$wordfocus"
+		# shellcheck disable=SC2059
+		{ [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && printf "$termreset"
+		printf '%s' "$wordend"
+
+		# Reset word sections
+		wordstart=
+		wordfocus=
+		wordend=
+
+	# No focus letter highlighting
 	else
-		# Set horizontal position of word
-		[ $((wordlen+termxcenter-(wordlen/2))) -gt "$termwidth" ] && wordlenexceed=true && wordx=0 || wordx=$((termxcenter-(wordlen/2)))
+
+		# Determine if word exceeds terminal width and set horizontal position of word
+		if [ $((wordlen+termxcenter-(wordlen/2))) -gt "$termwidth" ]; then
+			wordlenexceed=true
+			wordx=0
+		else
+			wordlenexceed=false
+			wordx=$((termxcenter-(wordlen/2)))
+		fi
+
+		# Print word
+		# shellcheck disable=SC2059
+		termMove "$termycenter" 0 && printf "$termclearline" && termMove "$termycenter" "$wordx" && printf "%s" "$word"
+
 	fi
 
-	# Output word
-	termMove "$termycenter" 0 && printf "%s" "$termclearline" && termMove "$termycenter" "$wordx" && printf "%s" "$word"
-	# Output presentation information
+	# Print presentation information
 	[ "$proginfo" = true ] && termMove 0 0 && printf "%s" "$termclearline" && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(((wordnum*100)/wordstotal))"
-	# Move cursor to bottom left
-	termMove "$termheight" 0
+	# Move cursor to bottom left if visible
+	! [ "$hidecursor" = true ] && termMove "$termheight" 0
 
-	# Set sleep time in milliseconds
-	sleeptime=$(calcFloat "1000/($wpm/60)") && sleeptimeint="${sleeptime%.*}"
+	# Set word sleep time in milliseconds
+	sleeptime=$(calcFloat "1000/($wpm/60)")
+	sleeptimeint="${sleeptime%.*}" # Sleep time as floored int
 	if [ "$firstword" = true ]; then
-		firstword=false && [ "$sleeptimeint" -lt 1000 ] && sleeptime=1000 && sleeptimeint=1000
+		firstword=false
+		[ "$sleeptimeint" -lt 1000 ] && sleeptime=1000 && sleeptimeint=1000
 	elif [ "$lengthvary" = true ]; then
-		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime=$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)") || sleeptime=$(calcFloat "$sleeptime*(($wordlenaverage-1)/$wordlenaverage)")
+		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime="$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)")" || sleeptime="$(calcFloat "$sleeptime*(($wordlenaverage-1)/$wordlenaverage)")"
 		sleeptimeint="${sleeptime%.*}"
 	fi
+
 	# Sleep
 	wordtime=$(($(getDate)-startdate))
 	if [ "$sleeptimeint" -gt "$wordtime" ]; then
@@ -209,7 +258,9 @@ for word in $input; do
 
 	# Re-init term if word length exceeds terminal width
 	[ "$wordlenexceed" = true ] && [ "$wordnum" -lt "$wordstotal" ] && initTerm
+
 done
 
 # Finish
-sleep 1 && endTput && exit 0
+sleep 1 && endTput
+exit 0
