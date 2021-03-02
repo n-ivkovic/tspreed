@@ -92,7 +92,6 @@ The script utilizes the terminal capabilities `cnorm` and `civis` are not guaran
 
 ## Todo
 
-* Add fallback method for when `rmcup` and/or `smcup` terminal capabilities are not supported.
 * Pause/resume and forward/back as suggested [here](https://github.com/n-ivkovic/tspreed/issues/3).
 
 ## Contributing
