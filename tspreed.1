@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-02-18 tspreed
+.TH tspreed 1 2021-03-02 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -46,7 +46,7 @@ Display pointers in a given style pointing towards the focus letter. Only takes 
 Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
 .TP
 .B -c \fIcolor\fR
-Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 8-bit color values, ranging from \fI0\fR to \fI255\fR.
+Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 color values, ranging from \fI0\fR to \fI255\fR. Note that color values above \fI7\fR mostly only work on featured terminal emulators i.e. xterm.
 .TP
 .B -v
 Print tspreed version and exit.
@@ -127,40 +127,18 @@ $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
 \fBtspreed\fR attempts to adhere to IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
 
-The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the script must utilize is the '%N' format in \fBdate\fR(1). The script will exit with an error if this functionality is not supported by the system.
+The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
+.TP
+\fBdate\fR(1) supports the '%N' format.
+.TP
+\fBsleep\fR(1) supports the use of floating point values for the time operand.
+.P
 
 .B TERMINAL CAPABILITIES
 
-\fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) which no standard can guarantee the support of. However, the vast majority of terminals that support ANSI X3.64 escape codes, which have been well-supported since the 1980s, usually map the escape codes to the capabilities utilized, except \fBrmcup\fR and \fBsmcup\fR. This means the capabilities utilized should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators.
+\fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) that are supported by terminals/terminal emulators that support ANSI X3.64 escape codes, which have been well-supported since the 1980s. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
 
-Listed below are the terminal capabilities utilized by the script.
-.TP
-\fBlines\fR
-.TP
-\fBcols\fR
-.TP
-\fBsgr0\fR
-Only utilized if focusbold is enabled or focuscolor is set.
-.TP
-\fBbold\fR
-Only utilized if focusbold is enabled.
-.TP
-\fBel\fR
-.TP
-\fBcup\fR
-.TP
-\fBsetaf\fR
-Only utilized if focuscolor is set.
-.TP
-\fBcnorm\fR
-Only utilized if hidecursor is enabled.
-.TP
-\fBcivis\fR
-Only utilized if hidecursor is enabled.
-.TP
-\fBrmcup\fR
-.TP
-\fBsncup\fR
+The script utilizes the terminal capabilities \fBcnorm\fR and \fBcivis\fR, which are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however they are well-supported on modern terminals and are only utilized if the -h/hidecursor option is enabled.
 
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.

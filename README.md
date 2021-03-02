@@ -68,7 +68,7 @@ The default values are stored in [`./default.rc`](./default.rc), which is instal
 | -f         | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
+| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) color values, ranging from 0 to 255. Note that color values above 7 mostly only work on featured terminal emulators i.e. xterm |
 | -v         |                      |               | Print tspreed version and exit. |
 
 ## Portability
@@ -79,25 +79,16 @@ tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e.
 
 tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
 
-The only functionality which does not adhere to POSIX.1-2001/SUSv3 which the script must utilize is the '%N' format in `date(1)`. The script will exit with an error if this functionality is not supported by the system.
+The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
+
+* `date(1)` supports the '%N' format.
+* `sleep(1)` supports the use of floating point values for the time operand.
 
 ### Terminal capabilities
 
-tspreed utilizes terminal capabilities via `tput(1)` which no standard can guarantee the support of. However, the vast majority of terminals that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes, which have been well-supported since the 1980s, usually map the escape codes to the capabilities utilized, except `rmcup` and `smcup`. This means the capabilities utilized should only present issues for those using older (physical) terminals, obscure terminals/terminal emulators, or otherwise very limited terminals/terminal emulators.
+tspreed utilizes terminal capabilities via `tput(1)` that are supported by terminals/terminal emulators that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes, which have been well-supported since the 1980s. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
 
-Listed below are the terminal capabilities utilized by the script.
-
-* `lines`
-* `cols`
-* `sgr0` - Only utilized if focusbold is enabled or focuscolor is set.
-* `bold` - Only utilized if focusbold is enabled.
-* `el`
-* `cup`
-* `setaf` - Only utilized if focuscolor is set.
-* `cnorm` - Only utilized if hidecursor is enabled.
-* `civis` - Only utilized if hidecursor is enabled.
-* `rmcup`
-* `smcup`
+The script utilizes the terminal capabilities `cnorm` and `civis` are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however they are well-supported on modern terminals and are only utilized if the -h/hidecursor option is enabled.
 
 ## Todo
 

@@ -31,16 +31,15 @@ termMove() {
 	tput cup "$1" "$2" 2>/dev/null || exitMsg 3 "cup"
 }
 
-# Initialise tput output
+# Initialise terminal output
 initTerm() {
-	tput clear
-
 	# Set term info
 	termheight="$(tput lines 2>/dev/null)" || exitMsg 3 "lines"
 	termwidth="$(tput cols 2>/dev/null)" || exitMsg 3 "cols"
 	termxcenter=$((termwidth/2))
 	termycenter=$((termheight/2))
-
+	# shellcheck disable=2059
+	printf "$termclear"
 	# Output pointers
 	if [ "$focus" = true ]; then
 		termMove "$((termycenter-1))" "$termxcenter" && printf "%s" "$pt1"
@@ -48,22 +47,26 @@ initTerm() {
 	fi
 }
 
-# Finish tput session
-endTput() {
-	tput rmcup 2>/dev/null || exitMsg 3 "rmcup"
+# Finish terminal output
+endTerm() {
+	if [ "$termsession" = true ]; then
+		tput rmcup
+	else
+		termMove "$((termheight-2))" 0
+	fi
 	[ "$hidecursor" = true ] && { tput cnorm 2>/dev/null || exitMsg 3 "cnorm"; }
 }
 
 # Handle exit from signals 
 catchExit() {
-	endTput
+	endTerm
 	! [ "$quietexit" = true ] && printf "%s/%s\n" "$wordnum" "$wordstotal"
 	exit 8
 }
 
 # Get current epoch timestamp in milliseconds
 getDate() {
-	if [ "$nonposixdate" = true ]; then
+	if [ "$nonposixdates" = true ]; then
 		printf "%s" "$(($(date -u "+%s%N/1000000")))"
 	else
 		printf "%s" "$(($(printf "%.0f" "$(date -u "+%S")")+$(printf "%.0f" "$(date -u "+%M")")$(date -u "+*60+%k*3600+(")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+-1)*86400+((%Y-1900)-70)*31536000+(((%Y-1900)-69)/4)*86400-(((%Y-1900)-1)/100)*86400+(((%Y-1900)+299)/400)*86400%N/1000000")))"
@@ -136,14 +139,19 @@ if [ "$focus" = true ]; then
 fi
 
 # Test non-POSIX features
-[ "$(date "+%N" 2>/dev/null)" = "%N" ] && exitMsg 2 "System does not support required date(1) format '%N'"
+datenanoformat="$(date "+%N" 2>/dev/null)"
 nonposixsleep=$(sleep 0.0 2>/dev/null && printf "true" || printf "false")
-nonposixdate=$(! [ "$(date "+%s" 2>/dev/null)" = "%s" ] && printf "true" || printf "false")
+nonposixdaten=$([ -n "${datenanoformat##*N*}" ] && printf "true" || printf "false")
+! [ "$nonposixsleep" = true ] && ! [ "$nonposixdaten" = true ] && exitMsg 2 "System supports neither non-POSIX sleep(1) nor non-POSIX date(1)"
+nonposixdates=$(! [ "$(date "+%s" 2>/dev/null)" = "%s" ] && printf "true" || printf "false")
 
 # Set term capabilties
 termclearline="$(tput el 2>/dev/null)" || exitMsg 3 "el"
+termhome="$(tput home 2>/dev/null)" || exitMsg 3 "home"
 [ "$focusbold" = true ] && { termbold="$(tput bold 2>/dev/null)" || exitMsg 3 "bold"; }
 { [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && { termreset="$(tput sgr0 2>/dev/null)" || exitMsg 3 "sgr0"; }
+termsession="$([ -n "$(tput smcup 2>/dev/null)" ] && [ -n "$(tput rmcup 2>/dev/null)" ] && printf "true" || printf "false")"
+[ "$termsession" = true ] && termclear="$(tput clear)" || termclear="$termhome$(tput ed 2 || exitMsg 3 "ed")"
 
 # Get input
 input=
@@ -152,7 +160,12 @@ while read -r inp; do
 done
 
 # Init presentation
-tput smcup 2>/dev/null || exitMsg 3 "smcup"
+if [ "$termsession" = true ]; then
+	tput smcup
+else
+	# shellcheck disable=SC2059
+	printf "$termclear"
+fi
 [ "$hidecursor" = true ] && { tput civis 2>/dev/null || exitMsg 3 "civis"; }
 initTerm
 wordlenaverage=5 # Based on average English word length of 5.1 letters
@@ -164,7 +177,7 @@ firstword=true
 for word in $input; do
 
 	# Init word 
-	startdate="$(getDate)"
+	[ "$nonposixdaten" = true ] && startdate="$(getDate)"
 	wordnum="$((wordnum+1))"
 	[ "$wordnum" -lt "$numstart" ] && continue
 	wordlen=${#word}
@@ -199,15 +212,10 @@ for word in $input; do
 		[ "$focusbold" = true ] && printf "$termbold"
 		# shellcheck disable=SC2059
 		[ -n "$focuscolor" ] && printf "$(getTermColor "$focuscolor")"
-		printf '%s' "$wordfocus"
+		printf "%s" "$wordfocus"
 		# shellcheck disable=SC2059
 		{ [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && printf "$termreset"
-		printf '%s' "$wordend"
-
-		# Reset word sections
-		wordstart=
-		wordfocus=
-		wordend=
+		printf "%s" "$wordend"
 
 	# No focus letter highlighting
 	else
@@ -228,9 +236,10 @@ for word in $input; do
 	fi
 
 	# Print presentation information
-	[ "$proginfo" = true ] && termMove 0 0 && printf "%s" "$termclearline" && printf "%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(((wordnum*100)/wordstotal))"
-	# Move cursor to bottom left if visible
-	! [ "$hidecursor" = true ] && termMove "$termheight" 0
+	# shellcheck disable=SC2059
+	[ "$proginfo" = true ] && printf "$termhome$termclearline%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(((wordnum*100)/wordstotal))" && termMove 0 "$termwidth"
+	# Move cursor to bottom left
+	termMove "$termheight" 0
 
 	# Set word sleep time in milliseconds
 	sleeptime=$(calcFloat "1000/($wpm/60)")
@@ -244,8 +253,8 @@ for word in $input; do
 	fi
 
 	# Sleep
-	wordtime=$(($(getDate)-startdate))
-	if [ "$sleeptimeint" -gt "$wordtime" ]; then
+	if [ "$nonposixdaten" = true ]; then
+		wordtime=$(($(getDate)-startdate))
 		if [ "$nonposixsleep" = true ]; then
 			sleep "$(calcFloat "($sleeptime-$wordtime)/1000")"
 		else
@@ -254,6 +263,8 @@ for word in $input; do
 				:
 			done
 		fi
+	else
+		sleep "$(calcFloat "$sleeptime/1000")"
 	fi
 
 	# Re-init term if word length exceeds terminal width
@@ -262,5 +273,5 @@ for word in $input; do
 done
 
 # Finish
-sleep 1 && endTput
+sleep 1 && endTerm
 exit 0
