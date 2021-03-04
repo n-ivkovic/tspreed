@@ -81,14 +81,14 @@ tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-200
 
 The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
 
-* `date(1)` supports the '%N' format.
-* `sleep(1)` supports the use of floating point values for the time operand.
+* The '%N' format in `date(1)`.
+* The use of floating point values for the time operand in `sleep(1)`.
 
 ### Terminal capabilities
 
 tspreed utilizes terminal capabilities via `tput(1)` that are supported by terminals/terminal emulators that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes, which have been well-supported since the 1980s. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
 
-The script utilizes the terminal capabilities `cnorm` and `civis` are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however they are well-supported on modern terminals and are only utilized if the -h/hidecursor option is enabled.
+The script utilizes the terminal capabilities `cnorm` and `civis` if the -h/hidecursor option is enabled. These capabilities are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however are well-supported on modern terminals.
 
 ## Todo
 

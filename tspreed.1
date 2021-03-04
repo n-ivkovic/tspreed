@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-03-02 tspreed
+.TH tspreed 1 2021-03-04 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -123,22 +123,18 @@ $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 .SH PORTABILITY 
 \fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-.B POSIX
-
 \fBtspreed\fR attempts to adhere to IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
 
 The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
 .TP
-\fBdate\fR(1) supports the '%N' format.
+The '%N' format in \fBdate\fR(1).
 .TP
-\fBsleep\fR(1) supports the use of floating point values for the time operand.
+The use of floating point values for the time operand in \fBsleep\fR(1).
 .P
-
-.B TERMINAL CAPABILITIES
 
 \fBtspreed\fR utilizes terminal capabilities via \fBtput\fR(1) that are supported by terminals/terminal emulators that support ANSI X3.64 escape codes, which have been well-supported since the 1980s. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
 
-The script utilizes the terminal capabilities \fBcnorm\fR and \fBcivis\fR, which are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however they are well-supported on modern terminals and are only utilized if the -h/hidecursor option is enabled.
+The script utilizes the terminal capabilities \fBcnorm\fR and \fBcivis\fR if the -h/hidecursor option is enabled. These capabilities are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however are well-supported on modern terminals.
 
 .SH REPORTING BUGS
 Bugs and issues can be reported on GitHub or GitLab.
