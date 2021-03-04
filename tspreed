@@ -12,16 +12,11 @@
 # $1 return value
 # $2 error message
 exitMsg() {
-	[ -n "$2" ] && { [ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" || printf "%s\n" "$2"; } >&2
+	[ "$termpresenting" = "true" ] && endTerm
+	{ [ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" || printf "%s\n" "$2"; } >&2
 	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]\n" >&2
 	printf "See 'man tspreed'\n" >&2
 	exit "$1"
-}
-
-# Get terminal foreground color escape sequence
-# $1 color
-getTermColor() {
-	tput setaf "$1" 2>/dev/null || exitMsg 3 "setaf"
 }
 
 # Move cursor to position
@@ -54,6 +49,7 @@ endTerm() {
 	else
 		termMove "$((termheight-2))" 0
 	fi
+	termpresenting=false
 	[ "$hidecursor" = true ] && { tput cnorm 2>/dev/null || exitMsg 3 "cnorm"; }
 }
 
@@ -115,8 +111,8 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 done
 
 # Validate word speed
-[ -z "$wpm" ] && exitMsg 1 "Words per minute not set"
-! { [ "$wpm" -ge 1 ] && [ "$wpm" -le 60000 ]; } 2>/dev/null && exitMsg 1 "Invalid wpm '$wpm'"
+[ -z "$wpm" ] && exitMsg 1 "WPM not set"
+! { [ "$wpm" -ge 1 ] && [ "$wpm" -le 60000 ]; } 2>/dev/null && exitMsg 1 "Invalid WPM '$wpm'"
 
 # Validate and set nth word as starting word
 [ -n "$numstart" ] && ! [ "$numstart" -ge 1 ] 2>/dev/null && exitMsg 1 "Invalid starting word position '$numstart'"
@@ -151,7 +147,7 @@ termhome="$(tput home)" 2>/dev/null || exitMsg 3 "home"
 [ "$focusbold" = true ] && { termbold="$(tput bold)" 2>/dev/null || exitMsg 3 "bold"; }
 { [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && { termreset="$(tput sgr0)" 2>/dev/null || exitMsg 3 "sgr0"; }
 termsession="$([ -n "$(tput smcup)" ] && [ -n "$(tput rmcup)" ] && printf "true" || printf "false")" 2>/dev/null
-[ "$termsession" = true ] && termclear="$(tput clear)" || termclear="$termhome$(tput ed 2 || exitMsg 3 "ed")" 2>/dev/null
+[ "$termsession" = true ] && termclear="$(tput clear)" || { { termclearall="$(tput ed 2)" 2>/dev/null || exitMsg 3 "ed"; } && termclear="$termhome$termclearall"; }
 
 # Get input
 input=
@@ -166,12 +162,13 @@ else
 	# shellcheck disable=SC2059
 	printf "$termclear"
 fi
+termpresenting=true
 [ "$hidecursor" = true ] && { tput civis 2>/dev/null || exitMsg 3 "civis"; }
 initTerm
-wordlenaverage=5 # Based on average English word length of 5.1 letters
 wordstotal=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 wordnum=0
 firstword=true
+wordlenaverage=5 # Based on average English word length of 5.1 letters
 
 # Present
 for word in $input; do
@@ -211,7 +208,7 @@ for word in $input; do
 		# shellcheck disable=SC2059
 		[ "$focusbold" = true ] && printf "$termbold"
 		# shellcheck disable=SC2059
-		[ -n "$focuscolor" ] && printf "$(getTermColor "$focuscolor")"
+		[ -n "$focuscolor" ] && { tput setaf "$focuscolor" 2>/dev/null || exitMsg 3 "setaf"; }
 		printf "%s" "$wordfocus"
 		# shellcheck disable=SC2059
 		{ [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && printf "$termreset"

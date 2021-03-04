@@ -59,7 +59,7 @@ The default values are stored in [`./default.rc`](./default.rc), which is instal
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
-| -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in words per minute. Required to be set. Minimum value of 1, maximum value of 60000 |
+| -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
