@@ -53,14 +53,14 @@ $ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
 
 ## Configuration
 
-The values provided in the command options take precidence over the values of the local config file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precidence over the values of the global config file `/etc/tspreed/tspreed.rc`.
+The values provided in the command options take precedence over the values of the local config file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precedence over the values of the global config file `/etc/tspreed/tspreed.rc`.
 
 The default values are stored in [`./default.rc`](./default.rc), which is installed as the global config during installation.
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
 | -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in words per minute. Required to be set. Minimum value of 1, maximum value of 60000 |
-| -n `num`   | numstart=`num`       |               | Start presenting from the nth word. Minimum value of 1. |
+| -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
 | -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
