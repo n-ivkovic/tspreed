@@ -12,7 +12,7 @@
 # $1 return value
 # $2 error message
 exitMsg() {
-	[ "$termpresenting" = "true" ] && endTerm
+	[ "$termpresenting" = true ] && endTerm
 	{ [ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" || printf "%s\n" "$2"; } >&2
 	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]\n" >&2
 	printf "See 'man tspreed'\n" >&2
@@ -33,7 +33,7 @@ initTerm() {
 	termwidth="$(tput cols)" 2>/dev/null || exitMsg 3 "cols"
 	termxcenter=$((termwidth/2))
 	termycenter=$((termheight/2))
-	# shellcheck disable=2059
+	# shellcheck disable=SC2059
 	printf "$termclear"
 	# Output pointers
 	if [ "$focus" = true ]; then
@@ -136,10 +136,10 @@ fi
 
 # Test non-POSIX features
 datenanoformat="$(date "+%N")" 2>/dev/null
-nonposixsleep=$(sleep 0.0 && printf "true" || printf "false") 2>/dev/null 
-nonposixdaten=$([ -n "${datenanoformat##*N*}" ] && printf "true" || printf "false")
+nonposixsleep="$(sleep 0.0 && printf "true" || printf "false")" 2>/dev/null
+nonposixdaten="$([ -n "${datenanoformat##*N*}" ] && printf "true" || printf "false")"
 ! [ "$nonposixsleep" = true ] && ! [ "$nonposixdaten" = true ] && exitMsg 2 "System supports neither non-POSIX sleep(1) nor non-POSIX date(1)"
-nonposixdates=$(! [ "$(date "+%s")" = "%s" ] && printf "true" || printf "false") 2>/dev/null
+nonposixdates="$(! [ "$(date "+%s")" = "%s" ] && printf "true" || printf "false")" 2>/dev/null
 
 # Set term capabilties
 termclearline="$(tput el)" 2>/dev/null || exitMsg 3 "el"
@@ -147,13 +147,15 @@ termhome="$(tput home)" 2>/dev/null || exitMsg 3 "home"
 [ "$focusbold" = true ] && { termbold="$(tput bold)" 2>/dev/null || exitMsg 3 "bold"; }
 { [ "$focusbold" = true ] || [ -n "$focuscolor" ]; } && { termreset="$(tput sgr0)" 2>/dev/null || exitMsg 3 "sgr0"; }
 termsession="$([ -n "$(tput smcup)" ] && [ -n "$(tput rmcup)" ] && printf "true" || printf "false")" 2>/dev/null
-[ "$termsession" = true ] && termclear="$(tput clear)" || { { termclearall="$(tput ed 2)" 2>/dev/null || exitMsg 3 "ed"; } && termclear="$termhome$termclearall"; }
+termclear="$(! [ "$termsession" = true ] && printf "%s%s" "$termhome" "$(tput ed 2)" || printf "%s" "$(tput clear)")" 2>/dev/null
 
 # Get input
 input=
 while read -r inp; do
 	input="$input$inp "
 done
+# Remove \r as they break looping over each word
+input="$(printf "%s" "$input" | sed "s/\\r//g")"
 
 # Init presentation
 if [ "$termsession" = true ]; then

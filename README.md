@@ -75,6 +75,8 @@ The default values are stored in [`./default.rc`](./default.rc), which is instal
 
 tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
+The script utilizes terminal capabilities via `tput(1)` that are often supported by terminals/terminal emulators that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes (which have been well-supported since the 1980s) where possible. Note that while the capabilities utilized are often well supported, no standard can guarentee their support across terminals/terminal emulators. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
+
 ### POSIX
 
 tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
@@ -83,12 +85,6 @@ The script must utilize at least one of the non-compliant functionalities listed
 
 * The '%N' format in `date(1)`.
 * The use of floating point values for the time operand in `sleep(1)`.
-
-### Terminal capabilities
-
-tspreed utilizes terminal capabilities via `tput(1)` that are supported by terminals/terminal emulators that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes, which have been well-supported since the 1980s. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
-
-The script utilizes the terminal capabilities `cnorm` and `civis` if the -h/hidecursor option is enabled. These capabilities are not guaranteed to be supported by terminals/terminal emulators that support ANSI X3.64, however are well-supported on modern terminals.
 
 ## Todo
 
