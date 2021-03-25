@@ -10,11 +10,14 @@ MANDIR   = $(DESTDIR)$(PREFIX)/share/man/man1
 MAN      = $(MANDIR)/$(EXEC).1
 CONFDIR  = $(DESTDIR)/etc/$(EXEC)
 CONF     = $(CONFDIR)/$(EXEC).rc
+PERMREG  = 644
+PERMEXE  = 755
 
 help:
 	@echo
 	@echo "             Display help"
 	@echo "  install    Install $(EXEC)"
+	@echo "  update     Update $(EXEC) installation, preserve global config"
 	@echo "  uninstall  Uninstall $(EXEC), preserve global config directory"
 	@echo "  purge      Uninstall $(EXEC), remove global config directory"
 	@echo "  test       Test $(EXEC) via ShellCheck"
@@ -22,9 +25,14 @@ help:
 	@echo
 
 install:
-	@mkdir -p $(BINDIR) && cp $(EXEC) $(BIN) && chmod 755 $(BIN) && echo "Installed $(BIN)"
-	@mkdir -p $(MANDIR) && cp $(EXEC).1 $(MAN) && chmod 644 $(MAN) && echo "Installed $(MAN)"
-	@[ ! -f "$(CONF)" ] && mkdir -p $(CONFDIR) && cp $(CONFVALS) $(CONF) && chmod 644 $(CONF) && echo "Installed $(CONF)"
+	@mkdir -p $(BINDIR) && cp $(EXEC) $(BIN) && chmod $(PERMEXE) $(BIN) && echo "Installed $(BIN)"
+	@mkdir -p $(MANDIR) && cp $(EXEC).1 $(MAN) && chmod $(PERMREG) $(MAN) && echo "Installed $(MAN)"
+	@mkdir -p $(CONFDIR) && cp $(CONFVALS) $(CONF) && chmod $(PERMREG) $(CONF) && echo "Installed $(CONF)"
+
+update:
+	@cp -f $(EXEC) $(BIN) && chmod $(PERMEXE) $(BIN) && echo "Updated $(BIN)"
+	@cp -f $(EXEC).1 $(MAN) && chmod $(PERMREG) $(MAN) && echo "Updated $(MAN)"
+	@if [ ! -f "$(CONF)" ]; then cp $(CONFVALS) $(CONF) && chmod $(PERMREG) $(CONF) && echo "Updated $(CONF)"; fi
 
 uninstall:
 	@rm -f $(BIN) && echo "Uninstalled $(BIN)"
@@ -38,4 +46,4 @@ test:
 	@-shellcheck $(EXEC) && echo "./$(EXEC) passed ShellCheck"
 	@-shellcheck -s sh -e SC2034 $(CONFVALS) && echo "./$(CONFVALS) passed ShellCheck"
 
-.PHONY: help install uninstall purge test
+.PHONY: help install update uninstall purge test

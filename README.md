@@ -29,9 +29,8 @@ $ cd tspreed
 #### Update
 
 ```
-# make uninstall
 $ git pull origin
-# make install
+# make update
 ```
 
 #### Additional options

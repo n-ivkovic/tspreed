@@ -37,8 +37,8 @@ initTerm() {
 	printf "$termclear"
 	# Output pointers
 	if [ "$focus" = true ]; then
-		termMove "$((termycenter-1))" "$termxcenter" && printf "%s" "$pt1"
-		termMove "$((termycenter+1))" "$termxcenter" && printf "%s" "$pt2"
+		termMove $((termycenter-1)) "$termxcenter" && printf "%s" "$pt1"
+		termMove $((termycenter+1)) "$termxcenter" && printf "%s" "$pt2"
 	fi
 }
 
@@ -47,7 +47,7 @@ endTerm() {
 	if [ "$termsession" = true ]; then
 		tput rmcup
 	else
-		termMove "$((termheight-2))" 0
+		termMove $((termheight-2)) 0
 	fi
 	termpresenting=false
 	[ "$hidecursor" = true ] && { tput cnorm 2>/dev/null || exitMsg 3 "cnorm"; }
@@ -55,7 +55,7 @@ endTerm() {
 
 # Handle exit from signals 
 catchExit() {
-	endTerm
+	[ "$termpresenting" = true ] && endTerm
 	! [ "$quietexit" = true ] && printf "%s/%s\n" "$wordnum" "$wordstotal"
 	exit 8
 }
@@ -63,9 +63,9 @@ catchExit() {
 # Get current epoch timestamp in milliseconds
 getDate() {
 	if [ "$nonposixdates" = true ]; then
-		printf "%s" "$(($(date -u "+%s%N/1000000")))"
+		printf "%s" $(($(date -u "+%s%N/1000000")))
 	else
-		printf "%s" "$(($(printf "%.0f" "$(date -u "+%S")")+$(printf "%.0f" "$(date -u "+%M")")$(date -u "+*60+%k*3600+(")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+-1)*86400+((%Y-1900)-70)*31536000+(((%Y-1900)-69)/4)*86400-(((%Y-1900)-1)/100)*86400+(((%Y-1900)+299)/400)*86400%N/1000000")))"
+		printf "%s" $(($(printf "%.0f" "$(date -u "+%S")")+$(printf "%.0f" "$(date -u "+%M")")$(date -u "+*60+%k*3600+(")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+-1)*86400+((%Y-1900)-70)*31536000+(((%Y-1900)-69)/4)*86400-(((%Y-1900)-1)/100)*86400+(((%Y-1900)+299)/400)*86400%N/1000000")))
 	fi
 }
 
@@ -75,6 +75,8 @@ calcFloat() {
 	awk "BEGIN { print $1 }"
 }
 
+# Init
+termpresenting=false
 # Catch signals
 trap "catchExit" 2    # SIGINT
 trap "catchExit" 3    # SIGQUIT
@@ -177,7 +179,7 @@ for word in $input; do
 
 	# Init word 
 	[ "$nonposixdaten" = true ] && startdate="$(getDate)"
-	wordnum="$((wordnum+1))"
+	wordnum=$((wordnum+1))
 	[ "$wordnum" -lt "$numstart" ] && continue
 	wordlen=${#word}
 
@@ -236,7 +238,7 @@ for word in $input; do
 
 	# Print presentation information
 	# shellcheck disable=SC2059
-	[ "$proginfo" = true ] && printf "$termhome$termclearline%s/%s\t%s%%" "$wordnum" "$wordstotal" "$(((wordnum*100)/wordstotal))" && termMove 0 "$termwidth"
+	[ "$proginfo" = true ] && printf "$termhome$termclearline%s/%s\t%s%%" "$wordnum" "$wordstotal" $(((wordnum*100)/wordstotal)) && termMove 0 "$termwidth"
 	# Move cursor to bottom left
 	termMove "$termheight" 0
 
