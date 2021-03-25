@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-03-05 tspreed
+.TH tspreed 1 2021-03-25 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -52,7 +52,7 @@ Display the focus letter in a given color. Only takes effect if focus letter hig
 Print tspreed version and exit.
 
 .SH CONFIGURATION
-The values provided in the command options take precedence over the values of the user-specific config file, which takes precedence over the values of the system-wide config file.
+The values provided in the command options take precedence over the values provided in the local configuration file, which takes precedence over the values provided in the global configuration file.
 .TP
 .B wpm=\fIwpm\fR
 Equivalent to \fB-w\fR option.
@@ -87,7 +87,7 @@ Equivalent to \fB-c\fR option.
 .SH EXIT STATUS
 .TP
 .B 0
-Success.
+Success - presentation completed.
 .TP
 .B 1
 Failure due to incorrect options/configuration.
@@ -104,7 +104,7 @@ Presentation terminated before completion - no failure.
 .SH ENVIRONMENT
 .TP
 .B XDG_CONFIG_HOME
-User-specific configuration is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is empty or not set, then \f(BI$HOME\fI/.config\fR is used in its place. This is in accordance with the XDG Base Directory Specification as defined by freedesktop.org.
+The local configuration file is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is not set or empty, then \f(BI$HOME\fI/.config\fR is used in its place. This is in adherence to the \fIXDG Base Directory Specification\fR.
 
 .SH FILES
 .TP
@@ -120,7 +120,7 @@ $ \fBtspreed < textfile\fR
 .P
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
-.SH PORTABILITY 
+.SH PORTABILITY
 \fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
 The script utilizes terminal capabilities via \fBtput\fR(1) that are often supported by terminals/terminal emulators that support \fIANSI X3.64\fR escape codes (which have been well-supported since the 1980s) where possible. Note that while the capabilities utilized are often well supported, no standard can guarentee their support across terminals/terminal emulators. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.

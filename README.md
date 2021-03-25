@@ -52,9 +52,9 @@ $ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
 
 ## Configuration
 
-The values provided in the command options take precedence over the values of the local config file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precedence over the values of the global config file `/etc/tspreed/tspreed.rc`.
+The values provided in the command options take precedence over the values provided in the local configuration file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precedence over the values provided in the global configuration file `/etc/tspreed/tspreed.rc`.
 
-The default values are stored in [`./default.rc`](./default.rc), which is installed as the global config during installation.
+The default values are provided in [./default.rc](./default.rc), which is installed as the global configuration file.
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
@@ -98,6 +98,6 @@ Please attempt to adhere to the following when creating a pull request:
 
 Copyright © 2021 Nicholas Ivkovic.
 
-Licensed under the GNU General Public License version 3 or later. See [`./LICENSE`](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
+Licensed under the GNU General Public License version 3 or later. See [./LICENSE](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
 
 This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
