@@ -85,10 +85,6 @@ The script must utilize at least one of the non-compliant functionalities listed
 * The '%N' format in `date(1)`.
 * The use of floating point values for the time operand in `sleep(1)`.
 
-## Todo
-
-* Pause/resume and forward/back as suggested [here](https://github.com/n-ivkovic/tspreed/issues/3).
-
 ## Contributing
 
 Please attempt to adhere to the following when creating a pull request:
