@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-03-25 tspreed
+.TH tspreed 1 2021-03-29 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -12,7 +12,7 @@ tspreed \- terminal RSVP speed reader with Spritz-like functionality
 [\fB\-c\fR \fIcolor\fR]
 
 .SH DESCRIPTION
-\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in POSIX shell. It reads plain text from stdin and presents it one word at time.
+\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in (almost POSIX-compliant) shell. It reads plain text from stdin and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -130,9 +130,9 @@ The script utilizes terminal capabilities via \fBtput\fR(1) that are often suppo
 
 The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
 .TP
-The '%N' format in \fBdate\fR(1).
+\fBdate\fR(1) can return nanoseconds via the '%N' format.
 .TP
-The use of floating point values for the time operand in \fBsleep\fR(1).
+\fBsleep\fR(1) supports the use of floating point values for the time operand to represent units of time less than a second.
 .P
 
 .SH REPORTING BUGS

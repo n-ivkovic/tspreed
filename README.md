@@ -1,6 +1,6 @@
 # tspreed
 
-tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX shell. It reads plain text from `stdin` and presents it one word at time.
+tspreed is a terminal RSVP speed reader with Spritz-like functionality written in (almost POSIX-compliant) shell. It reads plain text from `stdin` and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to `stdout`.
 
@@ -82,8 +82,8 @@ tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-200
 
 The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
 
-* The '%N' format in `date(1)`.
-* The use of floating point values for the time operand in `sleep(1)`.
+* `date(1)` can return nanoseconds via the '%N' format.
+* `sleep(1)` supports the use of floating point values for the time operand to represent units of time less than a second.
 
 ## Contributing
 

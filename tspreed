@@ -77,6 +77,9 @@ calcFloat() {
 
 # Init
 termpresenting=false
+wordnum=0
+wordlenaverage=5 # Based on average English word length of 5.1 letters
+firstword=true
 # Catch signals
 trap "catchExit" 2    # SIGINT
 trap "catchExit" 3    # SIGQUIT
@@ -106,7 +109,7 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG";;
 		b) focusbold=true;;
 		c) focuscolor="$OPTARG";;
-		v) printf "tspreed 2.0.0\n" && exit 0;;
+		v) printf "tspreed 2.0.1\n" && exit 0;;
 		\?) exitMsg 1 "Invalid option '-$OPTARG'";;
 		:) exitMsg 1 "Option -$OPTARG requires an argument.";;
 	esac
@@ -170,9 +173,6 @@ termpresenting=true
 [ "$hidecursor" = true ] && { tput civis 2>/dev/null || exitMsg 3 "civis"; }
 initTerm
 wordstotal=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
-wordnum=0
-firstword=true
-wordlenaverage=5 # Based on average English word length of 5.1 letters
 
 # Present
 for word in $input; do
@@ -244,13 +244,18 @@ for word in $input; do
 
 	# Set word sleep time in milliseconds
 	sleeptime=$(calcFloat "1000/($wpm/60)")
+	if [ "$lengthvary" = true ]; then
+		if [ "$wordlen" -gt "$wordlenaverage" ]; then
+			wl="$wordlen"
+		else
+			wl=$((wordlenaverage-1))
+		fi
+		sleeptime="$(calcFloat "$sleeptime*($wl/$wordlenaverage)")"
+	fi
 	sleeptimeint="${sleeptime%.*}" # Sleep time as floored int
 	if [ "$firstword" = true ]; then
 		firstword=false
 		[ "$sleeptimeint" -lt 1000 ] && sleeptime=1000 && sleeptimeint=1000
-	elif [ "$lengthvary" = true ]; then
-		[ "$wordlen" -gt "$wordlenaverage" ] && sleeptime="$(calcFloat "$sleeptime*($wordlen/$wordlenaverage)")" || sleeptime="$(calcFloat "$sleeptime*(($wordlenaverage-1)/$wordlenaverage)")"
-		sleeptimeint="${sleeptime%.*}"
 	fi
 
 	# Sleep
