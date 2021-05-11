@@ -13,7 +13,6 @@ If tspreed is terminated before the presentation has finished, the progress of t
 | Distro | Package | Maintainer |
 | ---    | ---     | ---        |
 | Arch Linux, Manjaro | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Nicholas Ivkovic |
-| Void Linux          | WIP, see [here](https://github.com/void-linux/void-packages/pull/27113) | KawaiiAmber |
 
 ### Manual
 
