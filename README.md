@@ -12,7 +12,7 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 | Distro | Package | Maintainer |
 | ---    | ---     | ---        |
-| Arch Linux, Manjaro | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Nicholas Ivkovic |
+| Arch Linux | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Nicholas Ivkovic |
 
 ### Manual
 
@@ -66,30 +66,28 @@ The default values are provided in [./default.rc](./default.rc), which is instal
 | -f         | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
 | -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) color values, ranging from 0 to 255. Note that color values above 7 mostly only work on featured terminal emulators i.e. xterm |
+| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
 | -v         |                      |               | Print tspreed version and exit. |
 
 ## Portability
 
-tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD) due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-The script utilizes terminal capabilities via `tput(1)` that are often supported by terminals/terminal emulators that support [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes (which have been well-supported since the 1980s) where possible. Note that while the capabilities utilized are often well supported, no standard can guarentee their support across terminals/terminal emulators. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
-
-### POSIX
-
-tspreed attempts to adhere to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
-
-The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
+tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the non-compliant functionalities listed below**. The script will exit with an error if neither functionality is supported by the system.
 
 * `date(1)` can return nanoseconds via the '%N' format.
-* `sleep(1)` supports the use of floating point values for the time operand to represent units of time less than a second.
+* `sleep(1)` supports the use of floating point values for the time operand to represent units of time less than 1 second.
+
+The script will determine at runtime if it can utilize additional non-compliant features to improve performance.
+
+The script utilizes terminal capabilities via `tput(1)`, but will fall back to [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes where possible if it determines at runtime that the capabilities are not supported.
 
 ## Contributing
 
 Please attempt to adhere to the following when creating a pull request:
 
-* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [./tspreed](./tspreed) and [./default.rc](./default.rc) via the online checker (note: SC2148 and SC2034 will be thrown when checking ./default.rc via the online checker, this is expected and ok). If the changes made create errors/warnings please provide a justification.
-* Ensure all changes conform to [IEEE Std 1003.1-2001 (a.k.a. SUSv3 or POSIX.1-2001)](https://pubs.opengroup.org/onlinepubs/000095399/) as much as possible.
+* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [./tspreed](./tspreed) (and [./default.rc](./default.rc) if changed) via the online checker. Any new errors/warnings and any suppressions of those errors/warnings should be explained.
+* Ensure all changes conform to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) as much as possible. Any non-conformant changes should be explained.
 * Ensure all indentation is done with a single tab per indent.
 * Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
 

@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-03-29 tspreed
+.TH tspreed 1 2021-08-29 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -46,10 +46,10 @@ Display pointers in a given style pointing towards the focus letter. Only takes 
 Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
 .TP
 .B -c \fIcolor\fR
-Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 color values, ranging from \fI0\fR to \fI255\fR. Note that color values above \fI7\fR mostly only work on featured terminal emulators i.e. xterm.
+Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 8-bit color values, ranging from \fI0\fR to \fI255\fR.
 .TP
 .B -v
-Print tspreed version and exit.
+Print \fBtspreed\fR version and exit.
 
 .SH CONFIGURATION
 The values provided in the command options take precedence over the values provided in the local configuration file, which takes precedence over the values provided in the global configuration file.
@@ -121,21 +121,24 @@ $ \fBtspreed < textfile\fR
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
 .SH PORTABILITY
-\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD). This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD) due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-The script utilizes terminal capabilities via \fBtput\fR(1) that are often supported by terminals/terminal emulators that support \fIANSI X3.64\fR escape codes (which have been well-supported since the 1980s) where possible. Note that while the capabilities utilized are often well supported, no standard can guarentee their support across terminals/terminal emulators. The script will determine at runtime which capabilities the terminal supports and either exit with an error or adjust its behavior accordingly.
+\fBtspreed\fR attempts to adhere to \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the non-compliant functionalities listed below.\fR The script will exit with an error if neither functionality is supported by the system.
 
-.SH PORTABILITY - POSIX
-\fBtspreed\fR attempts to adhere to \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, non-compliant functionalities have been utilized to either overcome limitations of the standard or improve performance where possible. The script will determine at runtime which non-compliant functionalities the system supports and either exit with an error or adjust its behavior accordingly.
-
-The script must utilize at least one of the non-compliant functionalities listed below. The script will exit with an error if neither functionality is supported by the system.
 .TP
 \fBdate\fR(1) can return nanoseconds via the '%N' format.
 .TP
 \fBsleep\fR(1) supports the use of floating point values for the time operand to represent units of time less than a second.
 .P
 
-.SH REPORTING BUGS
+The script will determine at runtime if it can utilize additional non-compliant features to improve performance.
+
+The script utilizes terminal capabilities via \fBtput\fR(1), but will fall back to \fIANSI X3.64\fR escape codes where possible if it determines at runtime that the capabilities are not supported.
+
+.SH SEE ALSO
+\fBdate\fR(1), \fBsleep\fR(1), \fBterminfo\fR(5)
+
+.SH BUGS
 Bugs and issues can be reported on GitHub or GitLab.
 
 <https://github.com/n-ivkovic/tspreed/issues>
@@ -143,7 +146,7 @@ Bugs and issues can be reported on GitHub or GitLab.
 <https://gitlab.com/n-ivkovic/tspreed/issues>
 
 .SH AUTHORS
-Nicholas Ivkovic <nivkovic@tuta.io>.
+Nicholas Ivkovic <https://nivkovic.net>.
 
 .SH COPYRIGHT
 Copyright (c) 2021 Nicholas Ivkovic.
