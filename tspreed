@@ -56,9 +56,11 @@ init_output() {
 # Initialise terminal output
 init_term() {
 	term_height="$(tput lines)" 2>/dev/null || {
+		# shellcheck disable=SC2015
 		[ -n "$LINES" ] && [ "$LINES" -gt 0 ] 2>/dev/null && term_height="$LINES" || exit_err 3 "lines"
 	}
 	term_width="$(tput cols)" 2>/dev/null || {
+		# shellcheck disable=SC2015
 		[ -n "$COLUMNS" ] && [ "$COLUMNS" -gt 0 ] 2>/dev/null && term_width="$COLUMNS" || exit_err 3 "cols"
 	}
 	term_x_center=$((term_width / 2))
@@ -107,7 +109,7 @@ config_local="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 
 # Init
 term_presenting=false
-first_word=true
+word_first=true
 word_num=0
 word_len_average=5 # Based on average English word length of 5.1 letters
 
@@ -184,6 +186,7 @@ done
 input="$(printf "%s" "$input" | sed "s/\\r//g")"
 
 # Init presentation
+words_count=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 if [ "$term_session" = true ]; then
 	tput smcup || exit_err 3 "smcup"
 else
@@ -195,7 +198,6 @@ term_presenting=true
 	tput civis 2>/dev/null || exit_err 3 "civis"
 }
 init_term
-words_count=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 
 # Present
 for word in $input; do
@@ -203,7 +205,6 @@ for word in $input; do
 	# Init word 
 	word_num=$((word_num + 1))
 	[ "$word_num" -lt "$numstart" ] && continue
-	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date)"
 	word_len=${#word}
 	word_x=0
 
@@ -215,6 +216,8 @@ for word in $input; do
 		# shellcheck disable=SC2059
 		printf "$term_clear_line"
 	fi
+
+	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date)"
 
 	# Focus letter highlighting enabled
 	if [ "$focus" = true ]; then
@@ -267,21 +270,26 @@ for word in $input; do
 	[ $((word_x + word_len)) -gt "$term_width" ] && prev_word_len_exceed=true || prev_word_len_exceed=false
 
 	# Set sleep time
-	sleep_time=$(calc_float "1000 / (${wpm} / 60)")
-	sleep_time_int="${sleep_time%.*}"
-	if [ "$first_word" = true ]; then
-		first_word=false
-		[ "$sleep_time_int" -lt 1000 ] && sleep_time=1000
-	elif [ "$lengthvary" = true ]; then
-		sleep_time="$(calc_float "$sleep_time * ($([ "$word_len" -gt "$word_len_average" ] && echo "$word_len" || echo $((word_len_average - 1))) / $word_len_average)")"
-	fi
-	[ "$non_posix_date_n" = true ] && sleep_time=$((sleep_time + $(get_date) - word_start_date))
-	[ "$sleep_time" -lt 0 ] && sleep_time=0
-	sleep_time_int="${sleep_time%.*}"
+	sleep_time_float=$(calc_float "1000 / (${wpm} / 60)")
+	[ "$lengthvary" = true ] && sleep_time_float="$(calc_float "${sleep_time_float} * ($([ "$word_len" -gt "$word_len_average" ] && echo "$word_len" || echo $((word_len_average - 1))) / ${word_len_average})")"
+	# Account for word processing time if possible
+	[ "$non_posix_date_n" = true ] && sleep_time_float=$(calc_float "${sleep_time_float} + ${word_start_date} - $(get_date)")
+	sleep_time_int="${sleep_time_float%.*}"
+	{ [ "$sleep_time_int" -lt 0 ] || [ "$sleep_time_int" = "-0" ]; } && {
+		sleep_time_float=0
+		sleep_time_int=0
+	}
+	[ "$word_first" = true ] && {
+		word_first=false
+		[ "$sleep_time_int" -lt 1000 ] && {
+			sleep_time_float=1000
+			sleep_time_int=1000
+		}
+	}
 
 	# Sleep
 	if [ "$non_posix_sleep" = true ]; then
-		sleep "$(calc_float "${sleep_time} / 1000")"
+		sleep "$(calc_float "${sleep_time_float} / 1000")"
 	elif [ "$non_posix_date_n" = true ]; then
 		sleep_date=$(($(get_date) + sleep_time_int))
 		while [ "$(get_date)" -lt "$sleep_date" ]; do
