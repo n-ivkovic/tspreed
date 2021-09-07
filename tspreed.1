@@ -12,7 +12,7 @@ tspreed \- terminal RSVP speed reader with Spritz-like functionality
 [\fB\-c\fR \fIcolor\fR]
 
 .SH DESCRIPTION
-\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in (almost POSIX-compliant) shell. It reads plain text from stdin and presents it one word at time.
+\fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. It reads plain text from stdin and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -121,14 +121,16 @@ $ \fBtspreed < textfile\fR
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
 
 .SH PORTABILITY
-\fBtspreed\fR 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD) due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+\fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-\fBtspreed\fR attempts to adhere to \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the non-compliant functionalities listed below.\fR The script will exit with an error if neither functionality is supported by the system.
+\fBtspreed\fR attempts to adhere to \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the non-compliant features or commands listed below.\fR The script will exit with an error if none of the features or commands are supported by the system.
 
 .TP
-\fBdate\fR(1) can return nanoseconds via the '%N' format.
+\fBdate\fR(1) - Can return nanoseconds via the '%N' format.
 .TP
-\fBsleep\fR(1) supports the use of floating point values for the time operand to represent units of time less than a second.
+\fBsleep\fR(1) - Supports the use of fractional values for the time operand to represent units of time less than 1 second.
+.TP
+\fBusleep\fR(1)
 .P
 
 The script will determine at runtime if it can utilize additional non-compliant features to improve performance.

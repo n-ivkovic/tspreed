@@ -132,7 +132,7 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v) printf "tspreed 2.0.2\n" && exit 0 ;;
+		v) printf "tspreed 2.1.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -163,10 +163,11 @@ done
 }
 
 # Test non-POSIX features
-date_nano_format="$(date "+%N")" 2>/dev/null
 sleep 0.0 2>/dev/null && non_posix_sleep=true || non_posix_sleep=false
+usleep 0 2>/dev/null && non_posix_usleep=true || non_posix_usleep=false
+date_nano_format="$(date "+%N")" 2>/dev/null
 [ -n "${date_nano_format##*N*}" ] && non_posix_date_n=true || non_posix_date_n=false
-! [ "$non_posix_sleep" = true ] && ! [ "$non_posix_date_n" = true ] && exit_err 2 "System supports neither non-POSIX sleep(1) nor non-POSIX date(1)"
+! [ "$non_posix_sleep" = true ] && ! [ "$non_posix_usleep" = true ] && ! [ "$non_posix_date_n" = true ] && exit_err 2 "System does not support required non-POSIX features or commands"
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null &&  non_posix_date_s=true || non_posix_date_s=false
 
 # Set term capabilities
@@ -290,6 +291,8 @@ for word in $input; do
 	# Sleep
 	if [ "$non_posix_sleep" = true ]; then
 		sleep "$(calc_float "${sleep_time_float} / 1000")"
+	elif [ "$non_posix_usleep" = true ]; then
+		usleep $((sleep_time_int * 1000))
 	elif [ "$non_posix_date_n" = true ]; then
 		sleep_date=$(($(get_date) + sleep_time_int))
 		while [ "$(get_date)" -lt "$sleep_date" ]; do

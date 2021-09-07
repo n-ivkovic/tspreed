@@ -1,6 +1,6 @@
 # tspreed
 
-tspreed is a terminal RSVP speed reader with Spritz-like functionality written in (almost POSIX-compliant) shell. It reads plain text from `stdin` and presents it one word at time.
+tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. It reads plain text from `stdin` and presents it one word at time.
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to `stdout`.
 
@@ -71,12 +71,13 @@ The default values are provided in [./default.rc](./default.rc), which is instal
 
 ## Portability
 
-tspreed 'officially' supports GNU-based systems and BSD-based systems only (i.e. GNU/Linux, macOS, BSD) due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the non-compliant functionalities listed below**. The script will exit with an error if neither functionality is supported by the system.
+tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the non-compliant features or commands listed below**. The script will exit with an error if none of the features or commands are supported by the system.
 
-* `date(1)` can return nanoseconds via the '%N' format.
-* `sleep(1)` supports the use of floating point values for the time operand to represent units of time less than 1 second.
+* `date(1)` - Can return nanoseconds via the '%N' format.
+* `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second.
+* `usleep(1)`
 
 The script will determine at runtime if it can utilize additional non-compliant features to improve performance.
 
