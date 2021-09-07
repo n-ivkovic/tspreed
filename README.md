@@ -73,15 +73,16 @@ The default values are provided in [./default.rc](./default.rc), which is instal
 
 tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
 
-tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the non-compliant features or commands listed below**. The script will exit with an error if none of the features or commands are supported by the system.
+tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
 
 * `date(1)` - Can return nanoseconds via the '%N' format.
 * `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second.
 * `usleep(1)`
 
-The script will determine at runtime if it can utilize additional non-compliant features to improve performance.
+The script utilizes terminal capabilities via `tput(1)`, but will fall back to the following where possible if those capabilities fail:
 
-The script utilizes terminal capabilities via `tput(1)`, but will fall back to [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes where possible if it determines at runtime that the capabilities are not supported.
+* [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes for terminal styling and cursor movement.
+* `$COLUMNS` and `$LINES` environment variables for determining terminal size.
 
 ## Contributing
 
