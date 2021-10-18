@@ -51,14 +51,15 @@ $ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
 
 ## Configuration
 
-The values provided in the command options take precedence over the values provided in the local configuration file `~/.config/tspreed/tspreed.rc` (if defined, `$XDG_CONFIG_HOME/tspreed/tspreed.rc` is used instead), which takes precedence over the values provided in the global configuration file `/etc/tspreed/tspreed.rc`.
+The values provided in the command options take precedence over the values provided in the local configuration file **`$XDG_CONFIG_HOME`/tspreed/tspreed.rc** (**~/.config/tspreed/tspreed.rc** if not defined), which takes precedence over the values provided in the global configuration file **/etc/tspreed/tspreed.rc**.
 
-The default values are provided in [./default.rc](./default.rc), which is installed as the global configuration file.
+The default values are provided in [**./default.rc**](./default.rc), which is installed as the global configuration file.
 
 | Option     | Configuration file   | Default value | Description |
 | ---        | ---                  | ---           | ---         |
 | -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
+| -s `chars` | separators=`chars`   | \f            | Characters used to separate words in addition to `$IFS`. Backslashes are interpreted. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
 | -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
@@ -88,7 +89,7 @@ The script utilizes terminal capabilities via `tput(1)`, but will fall back to t
 
 Please attempt to adhere to the following when creating a pull request:
 
-* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [./tspreed](./tspreed) (and [./default.rc](./default.rc) if changed) via the online checker. Any new errors/warnings and any suppressions of those errors/warnings should be explained.
+* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [**./tspreed**](./tspreed) (and [**./default.rc**](./default.rc) if changed) via the online checker. Any new errors/warnings and any suppressions of those errors/warnings should be explained.
 * Ensure all changes conform to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) as much as possible. Any non-conformant changes should be explained.
 * Ensure all indentation is done with a single tab per indent.
 * Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
@@ -97,6 +98,6 @@ Please attempt to adhere to the following when creating a pull request:
 
 Copyright © 2021 Nicholas Ivkovic.
 
-Licensed under the GNU General Public License version 3 or later. See [./LICENSE](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
+Licensed under the GNU General Public License version 3 or later. See [**./LICENSE**](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
 
 This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.

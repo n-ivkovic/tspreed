@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-09-07 tspreed
+.TH tspreed 1 2021-10-18 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -23,6 +23,9 @@ Speed words are presented at in WPM (words per minute). Required to be set. Mini
 .TP
 .B -n \fInum\fR 
 Start presenting from the \fIn\fRth word. Minimum value of \fI1\fR.
+.TP
+.B -s \fIchars\fR
+Characters used to separate words in addition to \fB$IFS\fR. Backslashes are interpreted.
 .TP
 .B -l
 Vary the speed words are presented at based on their length.
@@ -59,6 +62,9 @@ Equivalent to \fB-w\fR option.
 .TP
 .B numstart=\fInum\fR
 Equivalent to \fB-n\fR option.
+.TP
+.B separators=\fIchars\fR
+Equivalent to \fB-s\fR option.
 .TP
 .B lengthvary=\fIbool\fR
 Equivalent to \fB-l\fR option.
@@ -102,6 +108,9 @@ Failure due to terminal/terminal emulator not supporting required capabilities.
 Presentation terminated before completion - no failure.
 
 .SH ENVIRONMENT
+.TP
+.B IFS
+Default delimiters used to separate words.
 .TP
 .B XDG_CONFIG_HOME
 The local configuration file is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is not set or empty, then \f(BI$HOME\fI/.config\fR is used in its place. This is in adherence to the \fIXDG Base Directory Specification\fR.

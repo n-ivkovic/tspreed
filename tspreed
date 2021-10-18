@@ -120,10 +120,11 @@ trap "exit_catch" 14   # SIGALRM
 trap "exit_catch" 15   # SIGTERM
 trap "init_term" WINCH # Terminal emulator resize
 
-while getopts ":w:n:qhilfp:bc:v" opt; do
+while getopts ":w:n:s:qhilfp:bc:v" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG ;;
 		n) numstart="$OPTARG" ;;
+		s) separators="$OPTARG" ;;
 		l) lengthvary=true ;;
 		q) quietexit=true ;;
 		h) hidecursor=true ;;
@@ -132,7 +133,7 @@ while getopts ":w:n:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v) printf "tspreed 2.1.0\n" && exit 0 ;;
+		v) printf "tspreed 2.2.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -177,6 +178,9 @@ term_bold="$(tput bold 2>/dev/null || printf "\033[1m")"
 term_clear_line="$(tput el 2 2>/dev/null || printf "\033[2K")"
 [ -n "$(tput smcup 2>/dev/null)" ] && [ -n "$(tput rmcup 2>/dev/null)" ] && term_session=true || term_session=false
 ! [ "$term_session" = true ] && term_clear="$(printf "%s%s" "$term_home" "$(tput ed 2 2>/dev/null || printf "\033[2J")")" || term_clear="$(tput clear)" 2>/dev/null
+
+# Set IFS
+IFS="$(printf "%b%b" "$IFS" "$separators")"
 
 # Get input
 input=

@@ -1,4 +1,5 @@
 wpm=300
+separators="\f"
 hidecursor=true
 focuspointer=line
 focusbold=true
