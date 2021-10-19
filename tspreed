@@ -39,14 +39,13 @@ term_move() {
 term_color() {
 	tput setaf "$1" 2>/dev/null || {
 		# shellcheck disable=SC2015
-		[ "$1" -le 7 ] && printf "\033[3%sm" "$1" || exit_err 3 "setaf"
+		[ "$1" -le 7 ] && printf "%b" "\033[3${1}m" || exit_err 3 "setaf"
 	}
 }
 
 # Initialise output
 init_output() {
-	# shellcheck disable=SC2059
-	printf "$term_clear"
+	printf "%b" "$term_clear"
 	[ "$focus" = true ] && {
 		term_move $((term_y_center - 1)) "$term_x_center" && printf "%s" "$focus_pointer_1"
 		term_move $((term_y_center + 1)) "$term_x_center" && printf "%s" "$focus_pointer_2"
@@ -81,8 +80,7 @@ end_term() {
 			term_move "$term_height" 0
 		fi
 	fi
-	# shellcheck disable=SC2059
-	printf "$term_reset"
+	printf "%b" "$term_reset"
 	[ "$hidecursor" = true ] && {
 		tput cnorm 2>/dev/null || exit_err 3 "cnorm"
 	}
@@ -94,7 +92,7 @@ get_date() {
 }
 
 # Perform floating point calculation
-# $1 Calculation to perform
+# $1 calculation to perform
 calc_float() {
 	awk "BEGIN { print ${1} }"
 }
@@ -169,7 +167,7 @@ usleep 0 2>/dev/null && non_posix_usleep=true || non_posix_usleep=false
 date_nano_format="$(date "+%N")" 2>/dev/null
 [ -n "${date_nano_format##*N*}" ] && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$non_posix_sleep" = true ] && ! [ "$non_posix_usleep" = true ] && ! [ "$non_posix_date_n" = true ] && exit_err 2 "System does not support required non-POSIX features or commands"
-! [ "$(date "+%s")" = "%s" ] 2>/dev/null &&  non_posix_date_s=true || non_posix_date_s=false
+! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
 
 # Set term capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "\033[m")"
@@ -195,8 +193,7 @@ words_count=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 if [ "$term_session" = true ]; then
 	tput smcup || exit_err 3 "smcup"
 else
-	# shellcheck disable=SC2059
-	printf "$term_clear"
+	printf "%b" "$term_clear"
 fi
 term_presenting=true
 [ "$hidecursor" = true ] && {
@@ -208,9 +205,10 @@ init_term
 for word in $input; do
 
 	# Init word 
+	word_len=${#word}
+	[ "$word_len" -le 0 ] && continue
 	word_num=$((word_num + 1))
 	[ "$word_num" -lt "$numstart" ] && continue
-	word_len=${#word}
 	word_x=0
 
 	# Clear word
@@ -218,13 +216,12 @@ for word in $input; do
 		init_output
 	else
 		term_move "$term_y_center" 0
-		# shellcheck disable=SC2059
-		printf "$term_clear_line"
+		printf "%b" "$term_clear_line"
 	fi
 
 	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date)"
 
-	# Focus letter highlighting enabled
+	# Highlighted focus letter
 	if [ "$focus" = true ]; then
 
 		# Set focus letter
@@ -235,7 +232,6 @@ for word in $input; do
 			10|11|12|13) word_focus_pos=4 ;;
 			*)           word_focus_pos=5 ;;
 		esac
-
 		# Set horizontal position of word
 		word_x=$((term_x_center - word_focus_pos + 1))
 		term_move "$term_y_center" "$word_x"
@@ -257,18 +253,15 @@ for word in $input; do
 
 	# No focus letter highlighting
 	else
-
 		# Set horizontal position of word
 		[ $((word_x + word_len)) -le "$term_width" ] && word_x=$((term_x_center - (word_len / 2)))
 		term_move "$term_y_center" "$word_x"
-
+		# Print
 		printf "%s" "$word"
-
 	fi
 
 	# Print presentation information
-	# shellcheck disable=SC2059
-	[ "$proginfo" = true ] && printf "${term_home}${term_clear_line}%s/%s\t%s%%" "$word_num" "$words_count" $(((word_num * 100) / words_count))
+	[ "$proginfo" = true ] && printf "%b%s%b%s" "${term_home}${term_clear_line}" "${word_num}/${words_count}" "\t" "$(((word_num * 100) / words_count))%"
 
 	# End word
 	term_move "$term_height" 0
@@ -293,10 +286,10 @@ for word in $input; do
 	}
 
 	# Sleep
-	if [ "$non_posix_sleep" = true ]; then
-		sleep "$(calc_float "${sleep_time_float} / 1000")"
-	elif [ "$non_posix_usleep" = true ]; then
+	if [ "$non_posix_usleep" = true ]; then
 		usleep $((sleep_time_int * 1000))
+	elif [ "$non_posix_sleep" = true ]; then
+		sleep "$(calc_float "${sleep_time_float} / 1000")"
 	elif [ "$non_posix_date_n" = true ]; then
 		sleep_date=$(($(get_date) + sleep_time_int))
 		while [ "$(get_date)" -lt "$sleep_date" ]; do
