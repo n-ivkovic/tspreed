@@ -113,7 +113,11 @@ get_substr() {
 # Perform floating point calculation
 # $1 calculation to perform
 calc_float() {
-	awk "BEGIN { print ${1} }"
+	if [ "$use_bc" = true ]; then
+		echo "$1" | bc
+	else
+		awk "BEGIN { print ${1} }"
+	fi
 }
 
 # Import configs
@@ -187,6 +191,7 @@ date_nano_format="$(date "+%N")" 2>/dev/null
 [ -n "${date_nano_format##*N*}" ] && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$non_posix_sleep" = true ] && ! [ "$non_posix_usleep" = true ] && ! [ "$non_posix_date_n" = true ] && exit_err 2 "System does not support required non-POSIX features or commands"
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
+[ -n "$(command -v bc)" ] && use_bc=true || use_bc=false
 
 # Test wide character support
 wide_char="$(printf "\xCE\xA9")"
