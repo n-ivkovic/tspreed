@@ -30,7 +30,7 @@ exit_err() {
 # $1 row
 # $2 column
 term_move() {
-	tput cup "$1" "$2" 2>/dev/null || printf "%b[%d;%dH" "\033" "$1" "$2"
+	tput cup "$1" "$2" 2>/dev/null || printf "%b[%s;%sH" "\033" "$1" "$2"
 }
 
 # Set foreground color
@@ -38,12 +38,12 @@ term_move() {
 term_color() {
 	tput setaf "$1" 2>/dev/null || {
 		# shellcheck disable=SC2015
-		[ "$1" -le 7 ] && printf "%b[3%dm" "\033" "$1" || exit_err 3 "setaf"
+		[ "$1" -le 7 ] && printf "%b[3%sm" "\033" "$1" || exit_err 3 "setaf"
 	}
 }
 
 # Initialise output
-init_output() {
+init_presentation() {
 	printf "%b" "$term_clear"
 	[ "$focus" = true ] && {
 		term_move $((term_y_center - 1)) "$term_x_center" && printf "%s" "$focus_pointer_1"
@@ -53,17 +53,17 @@ init_output() {
 
 # Initialise terminal output
 init_term() {
-	term_height="$(tput lines)" 2>/dev/null || {
+	term_height="$(tput lines)" || {
 		# shellcheck disable=SC2015
 		[ -n "$LINES" ] && [ "$LINES" -gt 0 ] 2>/dev/null && term_height="$LINES" || exit_err 3 "lines"
 	}
-	term_width="$(tput cols)" 2>/dev/null || {
+	term_width="$(tput cols)" || {
 		# shellcheck disable=SC2015
 		[ -n "$COLUMNS" ] && [ "$COLUMNS" -gt 0 ] 2>/dev/null && term_width="$COLUMNS" || exit_err 3 "cols"
 	}
 	term_x_center=$((term_width / 2))
 	term_y_center=$((term_height / 2))
-	init_output
+	init_presentation
 }
 
 # Finish terminal output
@@ -71,7 +71,7 @@ init_term() {
 end_term() {
 	term_presenting=false
 	if [ "$term_session" = true ]; then
-		tput rmcup || exit_err 3 "rmcup"
+		tput rmcup 2>/dev/null || exit_err 3 "rmcup"
 	else
 		if [ "$1" -eq 8 ]; then
 			term_move $((term_height - 1)) 0
@@ -184,23 +184,17 @@ done
 	[ -n "$focuscolor" ] && ! { [ "$focuscolor" -ge 0 ] && [ "$focuscolor" -le 255 ]; } 2>/dev/null && exit_err 1 "Invalid focus letter color '${focuscolor}'"
 }
 
-# Test non-POSIX support
+# Set IFS
+IFS="$(printf "%b%b" "$IFS" "$separators")"
+
+# Determine non-POSIX capabilities
 sleep 0.0 2>/dev/null && non_posix_sleep=true || non_posix_sleep=false
-usleep 0 2>/dev/null && non_posix_usleep=true || non_posix_usleep=false
-date_nano_format="$(date "+%N")" 2>/dev/null
-[ -n "${date_nano_format##*N*}" ] && non_posix_date_n=true || non_posix_date_n=false
-[ "$non_posix_sleep" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support required non-POSIX features or commands"
+[ -n "$(command -v usleep)" ] && non_posix_usleep=true || non_posix_usleep=false
+! [ "$(date "+%N")" = "%N" ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
+[ "$non_posix_sleep" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support required non-POSIX features or commands"
 
-# Test command support
-[ -n "$(command -v bc)" ] && use_bc=true || use_bc=false
-
-# Test wide character support
-wide_char="$(printf "%b" "\0316\0251")"
-[ "${#wide_char}" -eq 1 ] && wide_param_expansion=true || wide_param_expansion=false
-[ "$(printf "%s" "$wide_char" | cut -c 1)" = "$wide_char" ] && wide_cut=true || wide_cut=false
-
-# Set term capabilities
+# Determine terminal capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "%b[m" "\033")"
 term_home="$(tput home 2>/dev/null || printf "%b[H" "\033")"
 term_bold="$(tput bold 2>/dev/null || printf "%b[1m" "\033")"
@@ -208,26 +202,31 @@ term_clear_line="$(tput el 2 2>/dev/null || printf "%b[2K" "\033")"
 [ -n "$(tput smcup 2>/dev/null)" ] && [ -n "$(tput rmcup 2>/dev/null)" ] && term_session=true || term_session=false
 [ "$term_session" = false ] && term_clear="$(printf "%s%s" "$term_home" "$(tput ed 2 2>/dev/null || printf "%b[2J" "\033")")" || term_clear="$(tput clear)" 2>/dev/null
 
-# Set IFS
-IFS="$(printf "%b%b" "$IFS" "$separators")"
+# Determine wide character capabilities
+wide_char="$(printf "%b" "\0316\0251")"
+[ "${#wide_char}" -eq 1 ] && wide_param_expansion=true || wide_param_expansion=false
+[ "$(printf "%s" "$wide_char" | cut -c 1)" = "$wide_char" ] && wide_cut=true || wide_cut=false
+wide_input=false
 
 # Get input
 input=
 while read -r inp; do
 	input="${input}${inp} "
+	# Determine if input contains wide characters
+	[ "$wide_input" = false ] && { [ "$wide_param_expansion" = true ] || [ ${#inp} -gt "$(printf "%s" "$inp" | awk '{ print length($0) }')" ]; } && wide_input=true
 done
 # Remove \r as they break looping over each word
 input="$(printf "%s" "$input" | sed "s/\\r//g")"
 
 # Determine command usage
-[ ${#input} -gt "$(printf "%s" "$input" | awk '{ print length($0) }')" ] && wide_input=true || wide_input=false
 { [ "$wide_input" = false ] || [ "$wide_param_expansion" = true ]; } && use_param_expansion=true || use_param_expansion=false
 { [ "$wide_input" = false ] || [ "$wide_cut" = true ]; } && use_cut=true || use_cut=false
+[ -n "$(command -v bc)" ] && use_bc=true || use_bc=false
 
 # Init presentation
 words_count=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
 if [ "$term_session" = true ]; then
-	tput smcup || exit_err 3 "smcup"
+	tput smcup 2>/dev/null || exit_err 3 "smcup"
 else
 	printf "%b" "$term_clear"
 fi
@@ -249,7 +248,7 @@ for word in $input; do
 
 	# Clear word
 	if [ "$prev_word_len_exceed" = true ] && [ "$word_num" -lt "$words_count" ]; then
-		init_output
+		init_presentation
 	else
 		term_move "$term_y_center" 0
 		printf "%b" "$term_clear_line"
