@@ -128,7 +128,7 @@ Local configuration file.
 .P
 $ \fBtspreed < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\f' -lqihfb -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihfb -p line -c 1\fR
 
 .SH PORTABILITY
 \fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.

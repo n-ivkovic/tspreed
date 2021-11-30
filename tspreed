@@ -213,8 +213,6 @@ wide_char="$(printf "%b" "\0316\0251")"
 while read -r inp; do
 	input="${input}${inp} "
 done
-# Remove \r as they break looping over each word
-input="$(printf "%s" "$input" | sed 's/\r//g')"
 # Determine if input contains wide characters
 [ "$(printf "%s" "$input" | wc -c)" -gt "$(printf "%s" "$input" | wc -m)" ] && wide_input=true || wide_input=false
 

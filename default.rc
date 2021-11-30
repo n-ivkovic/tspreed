@@ -1,5 +1,5 @@
 wpm=300
-separators="\f"
+separators='\r\f'
 hidecursor=true
 focuspointer=line
 focusbold=true
