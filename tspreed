@@ -7,6 +7,7 @@
 # Notes about disabled ShellChecks:
 #   SC1090 -- Config files do not need to/cannot be checked as they are user-written. Default config is checked separately
 #   SC2015 -- Disabled where behaviour resembling an if-then-else is not intended
+#   SC2086 -- Disabled where word splitting is intended
 
 # Exit from caught signals
 exit_catch() {
@@ -44,8 +45,8 @@ term_color() {
 
 # Initialise output
 init_presentation() {
-	printf "%b" "$term_clear"
-	[ "$focus" = true ] && {
+	printf "%s" "$term_clear"
+	[ -n "$focuspointer" ] && [ "$focus" = true ] && {
 		term_move $((term_y_center - 1)) "$term_x_center" && printf "%s" "$focus_pointer_1"
 		term_move $((term_y_center + 1)) "$term_x_center" && printf "%s" "$focus_pointer_2"
 	}
@@ -79,7 +80,7 @@ end_term() {
 			term_move "$term_height" 0
 		fi
 	fi
-	printf "%b" "$term_reset"
+	printf "%s" "$term_reset"
 	[ "$hidecursor" = true ] && {
 		tput cnorm 2>/dev/null || exit_err 3 "cnorm"
 	}
@@ -114,7 +115,7 @@ get_substr() {
 # $1 calculation to perform
 calc_float() {
 	if [ "$use_bc" = true ]; then
-		echo "$1" | bc
+		printf "%s\n" "$1" | bc
 	else
 		awk "BEGIN { print ${1} }"
 	fi
@@ -129,10 +130,13 @@ config_local="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
 [ -f "$config_local" ] && . "$config_local"
 
 # Init
+input=
 term_presenting=false
 word_first=true
 word_num=0
 word_len_average=5 # Based on average English word length of 5.1 letters
+focus_pointer_1=
+focus_pointer_2=
 
 trap "exit_catch" 2    # SIGINT
 trap "exit_catch" 3    # SIGQUIT
@@ -171,8 +175,6 @@ done
 # Validate focus letter options
 [ "$focus" = true ] && {
 	# Validate and set focus letter pointers
-	focus_pointer_1=
-	focus_pointer_2=
 	[ -n "$focuspointer" ] && [ "$focuspointer" != "none" ] && {
 		case "$focuspointer" in
 			line)  focus_pointer_1="|" && focus_pointer_2="|" ;;
@@ -185,14 +187,14 @@ done
 }
 
 # Set IFS
-IFS="$(printf "%b%b" "$IFS" "$separators")"
+IFS="$(printf "%s%b" "$IFS" "$separators")"
 
 # Determine non-POSIX capabilities
 sleep 0.0 2>/dev/null && non_posix_sleep=true || non_posix_sleep=false
 [ -n "$(command -v usleep)" ] && non_posix_usleep=true || non_posix_usleep=false
 ! [ "$(date "+%N")" = "%N" ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
-[ "$non_posix_sleep" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support required non-POSIX features or commands"
+[ "$non_posix_sleep" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support at least one of required non-POSIX features or commands"
 
 # Determine terminal capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "%b[m" "\033")"
@@ -206,17 +208,15 @@ term_clear_line="$(tput el 2 2>/dev/null || printf "%b[2K" "\033")"
 wide_char="$(printf "%b" "\0316\0251")"
 [ "${#wide_char}" -eq 1 ] && wide_param_expansion=true || wide_param_expansion=false
 [ "$(printf "%s" "$wide_char" | cut -c 1)" = "$wide_char" ] && wide_cut=true || wide_cut=false
-wide_input=false
 
 # Get input
-input=
 while read -r inp; do
 	input="${input}${inp} "
-	# Determine if input contains wide characters
-	[ "$wide_input" = false ] && { [ "$wide_param_expansion" = true ] || [ ${#inp} -gt "$(printf "%s" "$inp" | awk '{ print length($0) }')" ]; } && wide_input=true
 done
 # Remove \r as they break looping over each word
-input="$(printf "%s" "$input" | sed "s/\\r//g")"
+input="$(printf "%s" "$input" | sed 's/\r//g')"
+# Determine if input contains wide characters
+[ "$(printf "%s" "$input" | wc -c)" -gt "$(printf "%s" "$input" | wc -m)" ] && wide_input=true || wide_input=false
 
 # Determine command usage
 { [ "$wide_input" = false ] || [ "$wide_param_expansion" = true ]; } && use_param_expansion=true || use_param_expansion=false
@@ -224,11 +224,12 @@ input="$(printf "%s" "$input" | sed "s/\\r//g")"
 [ -n "$(command -v bc)" ] && use_bc=true || use_bc=false
 
 # Init presentation
-words_count=$(printf "%s" "$input" | wc -w | tr -d "[:space:]")
+# shellcheck disable=SC2086
+words_count=$(printf "%s " $input | wc -w | tr -d "[:space:]")
 if [ "$term_session" = true ]; then
 	tput smcup 2>/dev/null || exit_err 3 "smcup"
 else
-	printf "%b" "$term_clear"
+	printf "%s" "$term_clear"
 fi
 term_presenting=true
 [ "$hidecursor" = true ] && {
@@ -240,7 +241,7 @@ init_term
 for word in $input; do
 
 	# Init word 
-	[ "$use_param_expansion" = true ] && word_len=${#word} || word_len="$(printf "%s" "$word" | awk '{ print length($0) }')"
+	[ "$use_param_expansion" = true ] && word_len=${#word} || word_len="$(printf "%s" "$word" | wc -m)"
 	[ "$word_len" -le 0 ] && continue
 	word_num=$((word_num + 1))
 	[ "$word_num" -lt "$numstart" ] && continue
@@ -251,7 +252,7 @@ for word in $input; do
 		init_presentation
 	else
 		term_move "$term_y_center" 0
-		printf "%b" "$term_clear_line"
+		printf "%s" "$term_clear_line"
 	fi
 
 	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date)"
@@ -278,10 +279,10 @@ for word in $input; do
 			[ "$word_focus_pos" -gt 1 ] && printf "%s" "$(get_substr "$word" 1 $((word_focus_pos - 1)))"
 
 			# Print focus letter
-			[ "$focusbold" = true ] && printf "%b" "$term_bold"
+			[ "$focusbold" = true ] && printf "%s" "$term_bold"
 			[ -n "$focuscolor" ] && term_color "$focuscolor"
 			printf "%s" "$(get_substr "$word" "$word_focus_pos" 1)"
-			printf "%b" "$term_reset"
+			printf "%s" "$term_reset"
 
 			# Print end of word
 			printf "%s" "$(get_substr "$word" $((word_focus_pos + 1)))"
@@ -301,7 +302,7 @@ for word in $input; do
 	fi
 
 	# Print presentation information
-	[ "$proginfo" = true ] && printf "%b%s%b%s" "${term_home}${term_clear_line}" "${word_num}/${words_count}" "\t" "$(((word_num * 100) / words_count))%"
+	[ "$proginfo" = true ] && printf "%s%s%b%s" "${term_home}${term_clear_line}" "${word_num}/${words_count}" "\t" "$(((word_num * 100) / words_count))%"
 
 	# End word
 	term_move "$term_height" 0
@@ -326,16 +327,18 @@ for word in $input; do
 	}
 
 	# Sleep
-	if [ "$non_posix_usleep" = true ]; then
-		usleep $((sleep_time_int * 1000))
-	elif [ "$non_posix_sleep" = true ]; then
-		sleep "$(calc_float "${sleep_time_float} / 1000")"
-	elif [ "$non_posix_date_n" = true ]; then
-		sleep_date=$(($(get_date) + sleep_time_int))
-		while [ "$(get_date)" -lt "$sleep_date" ]; do
-			:
-		done
-	fi
+	[ "$sleep_time_int" -gt 0 ] && {
+		if [ "$non_posix_usleep" = true ]; then
+			usleep $((sleep_time_int * 1000))
+		elif [ "$non_posix_sleep" = true ]; then
+			sleep "$(calc_float "${sleep_time_float} / 1000")"
+		elif [ "$non_posix_date_n" = true ]; then
+			sleep_date=$(($(get_date) + sleep_time_int))
+			while [ "$(get_date)" -lt "$sleep_date" ]; do
+				:
+			done
+		fi
+	}
 
 done
 

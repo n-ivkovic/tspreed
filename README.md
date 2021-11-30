@@ -46,7 +46,7 @@ To use, pipe plain text into tspreed.
 $ tspreed < textfile
 ```
 ```	
-$ pdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1
+$ pdftotext document.pdf - | tspreed -w 300 -n 120 -s '\f' -lqihfb -p line -c 1
 ```
 
 ## Configuration
@@ -59,7 +59,7 @@ The default values are provided in [**./default.rc**](./default.rc), which is in
 | ---        | ---                  | ---           | ---         |
 | -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
-| -s `chars` | separators=`chars`   | \f            | Characters used to separate words in addition to `$IFS`. Backslash escapes are interpreted. |
+| -s `chars` | separators=`chars`   | \f            | Characters used for word splitting addition to `$IFS`. Backslash escapes are interpreted. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
 | -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |

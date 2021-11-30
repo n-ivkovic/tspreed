@@ -1,4 +1,4 @@
-.TH tspreed 1 2021-10-18 tspreed
+.TH tspreed 1 2021-12-01 tspreed
 
 .SH NAME
 tspreed \- terminal RSVP speed reader with Spritz-like functionality
@@ -8,6 +8,7 @@ tspreed \- terminal RSVP speed reader with Spritz-like functionality
 [\fB\-lqhifbv\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
+[\fB\-s\fR \fIchars\fR]
 [\fB\-p\fR \fIstyle\fR]
 [\fB\-c\fR \fIcolor\fR]
 
@@ -25,7 +26,7 @@ Speed words are presented at in WPM (words per minute). Required to be set. Mini
 Start presenting from the \fIn\fRth word. Minimum value of \fI1\fR.
 .TP
 .B -s \fIchars\fR
-Characters used to separate words in addition to \fB$IFS\fR. Backslash escapes are interpreted.
+Characters used for word splitting in addition to \fB$IFS\fR. Backslash escapes are interpreted.
 .TP
 .B -l
 Vary the speed words are presented at based on their length.
@@ -58,37 +59,37 @@ Print \fBtspreed\fR version and exit.
 The values provided in the command options take precedence over the values provided in the local configuration file, which takes precedence over the values provided in the global configuration file.
 .TP
 .B wpm=\fIwpm\fR
-Equivalent to \fB-w\fR option.
+Equivalent to the \fB-w\fR option.
 .TP
 .B numstart=\fInum\fR
-Equivalent to \fB-n\fR option.
+Equivalent to the \fB-n\fR option.
 .TP
 .B separators=\fIchars\fR
-Equivalent to \fB-s\fR option.
+Equivalent to the \fB-s\fR option.
 .TP
 .B lengthvary=\fIbool\fR
-Equivalent to \fB-l\fR option.
+Equivalent to the \fB-l\fR option.
 .TP
 .B quietexit=\fIbool\fR
-Equivalent to \fB-q\fR option.
+Equivalent to the \fB-q\fR option.
 .TP
 .B hidecursor=\fIbool\fR
-Equivalent to \fB-h\fR option.
+Equivalent to the \fB-h\fR option.
 .TP
 .B proginfo=\fIbool\fR
-Equivalent to \fB-i\fR option.
+Equivalent to the \fB-i\fR option.
 .TP
 .B focus=\fIbool\fR
-Equivalent to \fB-f\fR option.
+Equivalent to the \fB-f\fR option.
 .TP
 .B focuspointer=\fIstyle\fR
-Equivalent to \fB-p\fR option.
+Equivalent to the \fB-p\fR option.
 .TP
 .B focusbold=\fIbool\fR
-Equivalent to \fB-b\fR option.
+Equivalent to the \fB-b\fR option.
 .TP
 .B focuscolor=\fIcolor\fR
-Equivalent to \fB-c\fR option.
+Equivalent to the \fB-c\fR option.
 
 .SH EXIT STATUS
 .TP
@@ -99,10 +100,10 @@ Success - presentation completed.
 Failure due to incorrect options/configuration.
 .TP
 .B 2
-Failure due to system not supporting required functionalities that are not POSIX-compliant.
+Failure due to system not supporting at least one of the required non-POSIX features or commands.
 .TP
 .B 3
-Failure due to terminal/terminal emulator not supporting required capabilities.
+Failure due to terminal (emulator) not supporting required capabilities.
 .TP
 .B 8
 Presentation terminated before completion - no failure.
@@ -110,7 +111,7 @@ Presentation terminated before completion - no failure.
 .SH ENVIRONMENT
 .TP
 .B IFS
-Default delimiters used to separate words.
+Default characters used for word splitting.
 .TP
 .B XDG_CONFIG_HOME
 The local configuration file is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is not set or empty, then \f(BI$HOME\fI/.config\fR is used in its place. This is in adherence to the \fIXDG Base Directory Specification\fR.
@@ -127,7 +128,7 @@ Local configuration file.
 .P
 $ \fBtspreed < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -lifb -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\f' -lqihfb -p line -c 1\fR
 
 .SH PORTABILITY
 \fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.

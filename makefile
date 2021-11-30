@@ -35,12 +35,12 @@ update:
 	@if [ ! -f "$(CONF)" ]; then cp $(CONFVALS) $(CONF) && chmod $(PERMREG) $(CONF) && echo "Updated $(CONF)"; fi
 
 uninstall:
-	@rm -f $(BIN) && echo "Uninstalled $(BIN)"
-	@rm -f $(MAN) && echo "Uninstalled $(MAN)"
+	@if [ -f "$(BIN)" ]; then rm -f $(BIN) && echo "Uninstalled $(BIN)"; else echo "$(BIN) does not exist, cannot uninstall"; fi
+	@if [ -f "$(MAN)" ]; then rm -f $(MAN) && echo "Uninstalled $(MAN)"; else echo "$(MAN) does not exist, cannot uninstall"; fi
 
 purge: uninstall
-	@rm -rf $(CONFDIR) && echo "Removed $(CONFDIR)"
-	@echo "NOTE: ~/.config/$(EXEC) (XDG_CONFIG_HOME/$(EXEC) if defined) may still exist. This will need to be removed manually if so desired."
+	@if [ -d "$(CONFDIR)" ]; then rm -rf $(CONFDIR) && echo "Removed $(CONFDIR)"; else echo "$(CONFDIR) does not exist, cannot remove"; fi
+	@echo "NOTE: \$$XDG_CONFIG_HOME/$(EXEC) (~/.config/$(EXEC) if not defined) may still exist. This will need to be removed manually if so desired."
 
 test:
 	@-shellcheck $(EXEC) && echo "./$(EXEC) passed ShellCheck"
