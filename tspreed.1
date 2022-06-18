@@ -1,7 +1,7 @@
-.TH tspreed 1 2022-06-12 tspreed
+.TH tspreed 1 2022-06-18
 
 .SH NAME
-tspreed \- terminal RSVP speed reader with Spritz-like functionality
+\fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
@@ -114,7 +114,7 @@ Presentation terminated before completion - no failure.
 Default characters used for word splitting.
 .TP
 .B XDG_CONFIG_HOME
-The local configuration file is located within the directory defined. If \fB$XDG_CONFIG_HOME\fR is not set or empty, then \f(BI$HOME\fI/.config\fR is used in its place. This is in adherence to the \fIXDG Base Directory Specification\fR.
+The local configuration file is located within the directory defined. Uses \f(BI$HOME\fI/.config\fR if not defined in compliance with the \fIXDG Base Directory Specification\fR.
 
 .SH FILES
 .TP
@@ -131,9 +131,9 @@ $ \fBtspreed < textfile\fR
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihfb -p line -c 1\fR
 
 .SH PORTABILITY
-\fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+\fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script is guaranteed to not work on other Unix-like systems or issues specific to those systems will not be addressed, merely it is unknown how well supported the script is on other Unix-like systems.
 
-\fBtspreed\fR attempts to adhere to \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the below non-compliant features or commands\fR and will exit with an error if none are supported:
+\fBtspreed\fR attempts to comply with \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the below non-compliant features or commands\fR and will exit with an error if none are supported:
 
 .TP
 \fBdate\fR(1)
@@ -148,20 +148,28 @@ Supports the use of fractional values for the time operand to represent units of
 The script utilizes terminal capabilities via \fBtput\fR(1), but will fall back to the following where possible if those capabilities fail:
 
 .TP
-Terminal styling and cursor movement
-\fIANSI X3.64\fR escape codes.
+\fIANSI X3.64\fR escape codes
+For terminal styling and cursor movement
 .TP
-Determining terminal size
-\fI$COLUMNS\fR and \fI$LINES\fR environment variables.
+\fB$COLUMNS\fR, \fB$LINES\fR
+For determining terminal size
 
 .SH SEE ALSO
-\fBdate\fR(1), \fBsleep\fR(1), \fBterminfo\fR(5)
+\fBdate\fR(1), \fBsleep\fR(1), \fBusleep\fR(1), \fBterminfo\fR(5)
+
+.SH STANDARDS
+.TP
+IEEE Std 1003.1-2001
+.TP
+ANSI X3.64
+.TP
+XDG Base Directory Specification
 
 .SH BUGS
 Bugs and issues can be reported on GitHub or GitLab.
-
+.TP
 <https://github.com/n-ivkovic/tspreed/issues>
-
+.TP
 <https://gitlab.com/n-ivkovic/tspreed/issues>
 
 .SH AUTHORS

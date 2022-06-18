@@ -18,7 +18,7 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 #### Install
 
-Replace github.com with gitlab.com if using GitLab.
+Replace `github.com` with `gitlab.com` if using GitLab.
 ```
 $ git clone https://github.com/n-ivkovic/tspreed
 $ cd tspreed
@@ -59,7 +59,7 @@ The default values are provided in [**./default.rc**](./default.rc), which is in
 | ---        | ---                  | ---           | ---         |
 | -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
-| -s `chars` | separators=`chars`   | \r\f          | Characters used for word splitting addition to `$IFS`. Backslash escapes are interpreted. |
+| -s `chars` | separators=`chars`   | \r\f          | Characters used for word splitting in addition to `$IFS`. Backslash escapes are interpreted. |
 | -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
 | -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
 | -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
@@ -72,9 +72,9 @@ The default values are provided in [**./default.rc**](./default.rc), which is in
 
 ## Portability
 
-tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script will not work on other Unix-like systems or portability is not treated as a priority, however this does mean compatibility is not guaranteed on unsupported systems.
+tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script is guaranteed to not work on other Unix-like systems or issues specific to those systems will not be addressed, merely it is unknown how well supported the script is on other Unix-like systems.
 
-tspreed attempts to adhere to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
+tspreed attempts to comply with [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
 
 * `date(1)` - Can return nanoseconds via the '%N' format.
 * `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second.
@@ -87,12 +87,12 @@ The script utilizes terminal capabilities via `tput(1)`, but will fall back to t
 
 ## Contributing
 
-Please attempt to adhere to the following when creating a pull request:
+Please adhere to the following when creating a pull request:
 
 * Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [**./tspreed**](./tspreed) (and [**./default.rc**](./default.rc) if changed) via the online checker. Any new errors/warnings and any suppressions of those errors/warnings should be explained.
 * Ensure all changes conform to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) as much as possible. Any non-conformant changes should be explained.
-* Ensure all indentation is done with a single tab per indent.
-* Ensure the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model is (somewhat) adhered to. Ensure changes are branched from `develop` and the pull request merges back into `develop`. Note that before the PR is accepted the target branch may be changed to a new branch named either `feature/[branch-name]` or `fix/[branch-name]`.
+* Ensure changes match the general coding style of the project.
+* Ensure changes are branched from `develop` and the pull request merges back into `develop`.
 
 ## License
 
