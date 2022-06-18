@@ -137,6 +137,7 @@ word_num=0
 word_len_average=5 # Based on average English word length of 5.1 letters
 focus_pointer_1=
 focus_pointer_2=
+prev_word_len_exceed=false
 
 trap "exit_catch" 2    # SIGINT
 trap "exit_catch" 3    # SIGQUIT
@@ -248,7 +249,7 @@ for word in $input; do
 	word_x=0
 
 	# Clear word
-	if [ "$prev_word_len_exceed" = true ] && [ "$word_num" -lt "$input_words" ]; then
+	if [ "$prev_word_len_exceed" = true ]; then
 		init_presentation
 	else
 		term_move "$term_y_center" 0
