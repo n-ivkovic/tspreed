@@ -55,12 +55,10 @@ init_presentation() {
 # Initialise terminal output
 init_term() {
 	term_height="$(tput lines)" || {
-		# shellcheck disable=SC2015
-		[ -n "$LINES" ] && [ "$LINES" -gt 0 ] 2>/dev/null && term_height="$LINES" || exit_err 3 "lines"
+		[ -n "$LINES" ] && [ "$LINES" -gt 0 ] 2>/dev/null && term_height="$LINES" || term_height=24
 	}
 	term_width="$(tput cols)" || {
-		# shellcheck disable=SC2015
-		[ -n "$COLUMNS" ] && [ "$COLUMNS" -gt 0 ] 2>/dev/null && term_width="$COLUMNS" || exit_err 3 "cols"
+		[ -n "$COLUMNS" ] && [ "$COLUMNS" -gt 0 ] 2>/dev/null && term_width="$COLUMNS" || term_width=80
 	}
 	term_x_center=$((term_width / 2))
 	term_y_center=$((term_height / 2))
@@ -159,7 +157,7 @@ while getopts ":w:n:s:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v) printf "tspreed 2.2.1\n" && exit 0 ;;
+		v) printf "tspreed 2.3.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac

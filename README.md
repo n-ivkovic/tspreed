@@ -83,7 +83,7 @@ tspreed attempts to comply with [IEEE Std 1003.1-2001](https://pubs.opengroup.or
 The script utilizes terminal capabilities via `tput(1)`, but will fall back to the following where possible if those capabilities fail:
 
 * [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes for terminal styling and cursor movement.
-* `$COLUMNS` and `$LINES` environment variables for determining terminal size.
+* `$COLUMNS` and `$LINES` environment variables for determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not defined.
 
 ## Contributing
 

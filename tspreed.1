@@ -1,4 +1,4 @@
-.TH tspreed 1 2022-06-18
+.TH tspreed 1 2022-06-24
 
 .SH NAME
 \fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
@@ -152,7 +152,7 @@ The script utilizes terminal capabilities via \fBtput\fR(1), but will fall back 
 For terminal styling and cursor movement
 .TP
 \fB$COLUMNS\fR, \fB$LINES\fR
-For determining terminal size
+For determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not defined.
 
 .SH SEE ALSO
 \fBdate\fR(1), \fBsleep\fR(1), \fBusleep\fR(1), \fBterminfo\fR(5)
