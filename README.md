@@ -1,4 +1,18 @@
-# tspreed
+# Tspreed but without the "usleep is deprecated, and will be removed in near future!" warning.
+
+**Note: NOT TESTED**
+
+Why?
+
+I wanted to get rid of the warning.
+
+"warning: usleep is deprecated, and will be removed in near future!"
+
+"warning: use "sleep 1e-06" instead..."
+
+Fix:
+
+Replace "usleep" with "sleep 1e-06".
 
 tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. It reads plain text from `stdin` and presents it one word at time.
 
@@ -7,16 +21,6 @@ If tspreed is terminated before the presentation has finished, the progress of t
 ![tspreed demo gif](.img/tspreed.gif)
 
 ## Installation
-
-### Packages
-
-| Distro | Package | Maintainer |
-| ---    | ---     | ---        |
-| Arch Linux | [tspreed (AUR)](https://aur.archlinux.org/packages/tspreed/) | Nicholas Ivkovic |
-
-### Manual
-
-#### Install
 
 Replace `github.com` with `gitlab.com` if using GitLab.
 ```
