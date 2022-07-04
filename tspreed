@@ -190,10 +190,10 @@ IFS="$(printf "%s%b" "$IFS" "$separators")"
 
 # Determine non-POSIX capabilities
 sleep 0.0 2>/dev/null && non_posix_sleep=true || non_posix_sleep=false
-[ -n "$(command -v usleep)" ] && non_posix_usleep=true || non_posix_usleep=false
+[ -n "$(command -v sleep 1e-06)" ] && non_posix_sleep=true || non_posix_sleep=false
 ! [ "$(date "+%N")" = "%N" ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
-[ "$non_posix_sleep" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support at least one of required non-POSIX features or commands"
+[ "$non_posix_sleep" = false ] && [ "$non_posix_sleep 1e-06" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support at least one of required non-POSIX features or commands"
 
 # Determine terminal capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "%b[m" "\033")"
@@ -327,8 +327,8 @@ for word in $input; do
 
 	# Sleep
 	[ "$sleep_time_int" -gt 0 ] && {
-		if [ "$non_posix_usleep" = true ]; then
-			usleep $((sleep_time_int * 1000))
+		if [ "$non_posix_sleep 1e-06" = true ]; then
+			sleep 1e-06 $((sleep_time_int * 1000))
 		elif [ "$non_posix_sleep" = true ]; then
 			sleep "$(calc_float "${sleep_time_float} / 1000")"
 		elif [ "$non_posix_date_n" = true ]; then
