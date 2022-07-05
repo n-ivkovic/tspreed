@@ -1,4 +1,4 @@
-.TH tspreed 1 2022-06-24
+.TH tspreed 1 2022-07-05
 
 .SH NAME
 \fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
@@ -140,7 +140,10 @@ $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihfb -p lin
 Can return nanoseconds via the '%N' format.
 .TP
 \fBsleep\fR(1)
-Supports the use of fractional values for the time operand to represent units of time less than 1 second.
+Supports the use of fractional values for the time operand to represent units of time less than 1 second, e.g. 0.05.
+.TP
+\fBsleep\fR(1)
+Supports the use of E notation for the time operand to represent units of time less than 1 second, e.g. 5e-2.
 .TP
 \fBusleep\fR(1)
 

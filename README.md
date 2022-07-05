@@ -77,7 +77,8 @@ tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems on
 tspreed attempts to comply with [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
 
 * `date(1)` - Can return nanoseconds via the '%N' format.
-* `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second.
+* `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second, e.g. 0.05.
+* `sleep(1)` - Supports the use of E notation for the time operand to represent units of time less than 1 second, e.g. 5e-2.
 * `usleep(1)`
 
 The script utilizes terminal capabilities via `tput(1)`, but will fall back to the following where possible if those capabilities fail:
