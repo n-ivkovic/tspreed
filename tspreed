@@ -85,7 +85,7 @@ end_term() {
 }
 
 # Get current epoch timestamp in milliseconds
-get_date() {
+get_date_ms() {
 	[ "$non_posix_date_s" = true ] && echo $(($(date -u "+%s%N / 1000000"))) || echo $(($(printf "%.0f" "$(date -u "+%S")") + $(printf "%.0f" "$(date -u "+%M")")$(date -u "+ * 60 + %k * 3600 + (")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+ - 1) * 86400 + ((%Y - 1900) - 70) * 31536000 + (((%Y - 1900) - 69) / 4) * 86400 - (((%Y - 1900) - 1) / 100) * 86400 + (((%Y - 1900) + 299) / 400) * 86400%N / 1000000")))
 }
 
@@ -255,7 +255,7 @@ for word in $input; do
 		printf "%s" "$term_clear_line"
 	fi
 
-	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date)"
+	[ "$non_posix_date_n" = true ] && word_start_date="$(get_date_ms)"
 
 	# Highlighted focus letter
 	if [ "$focus" = true ]; then
@@ -308,35 +308,33 @@ for word in $input; do
 	term_move "$term_height" 0
 	[ $((word_x + word_len)) -gt "$term_width" ] && prev_word_len_exceed=true || prev_word_len_exceed=false
 
-	# Set sleep time
-	sleep_time_float=$(calc_float "1000 / (${wpm} / 60)")
-	[ "$lengthvary" = true ] && sleep_time_float="$(calc_float "${sleep_time_float} * ($([ "$word_len" -gt "$word_len_average" ] && echo "$word_len" || echo $((word_len_average - 1))) / ${word_len_average})")"
+	# Calculate sleep time
+	sleep_ms_float=$(calc_float "1000 / (${wpm} / 60)")
+	[ "$lengthvary" = true ] && sleep_ms_float="$(calc_float "${sleep_ms_float} * ($([ "$word_len" -gt "$word_len_average" ] && echo "$word_len" || echo $((word_len_average - 1))) / ${word_len_average})")"
 	# Account for word processing time if possible
-	[ "$non_posix_date_n" = true ] && sleep_time_float=$(calc_float "${sleep_time_float} + ${word_start_date} - $(get_date)")
-	sleep_time_int="${sleep_time_float%.*}"
-	{ [ "$sleep_time_int" -lt 0 ] || [ "$sleep_time_int" = "-0" ]; } && {
-		sleep_time_float=0
-		sleep_time_int=0
-	}
+	[ "$non_posix_date_n" = true ] && sleep_ms_float=$(calc_float "${sleep_ms_float} + ${word_start_date} - $(get_date_ms)")
+
+	# Convert sleep time to positive int
+	sleep_ms="${sleep_ms_float%.*}"
+	[ "$(printf "%s" "$sleep_ms" | cut -c 1)" = "-" ] && sleep_ms=0
+
+	# Sleep first word for minimum 1 second
 	[ "$word_first" = true ] && {
 		word_first=false
-		[ "$sleep_time_int" -lt 1000 ] && {
-			sleep_time_float=1000
-			sleep_time_int=1000
-		}
+		[ "$sleep_ms" -lt 1000 ] && sleep_ms=1000
 	}
 
 	# Sleep
-	[ "$sleep_time_int" -gt 0 ] && {
+	[ "$sleep_ms" -gt 0 ] && {
 		if [ "$non_posix_sleep_enotation" = true ]; then
-			sleep "${sleep_time_int}e-3"
+			sleep "${sleep_ms}e-3"
 		elif [ "$non_posix_usleep" = true ]; then
-			usleep $((sleep_time_int * 1000))
+			usleep $((sleep_ms * 1000))
 		elif [ "$non_posix_sleep_fractional" = true ]; then
-			sleep "$(calc_float "${sleep_time_float} / 1000")"
+			sleep "$(calc_float "${sleep_ms} / 1000")"
 		elif [ "$non_posix_date_n" = true ]; then
-			sleep_date=$(($(get_date) + sleep_time_int))
-			while [ "$(get_date)" -lt "$sleep_date" ]; do
+			sleep_date=$(($(get_date_ms) + sleep_ms))
+			while [ "$(get_date_ms)" -lt "$sleep_date" ]; do
 				:
 			done
 		fi
