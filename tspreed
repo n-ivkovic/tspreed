@@ -157,7 +157,7 @@ while getopts ":w:n:s:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v) printf "tspreed 2.3.0\n" && exit 0 ;;
+		v) printf "tspreed 2.4.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -337,6 +337,8 @@ for word in $input; do
 			while [ "$(get_date_ms)" -lt "$sleep_date" ]; do
 				:
 			done
+		else
+			exit_err 2 "System does not support at least one of required non-POSIX features or commands"
 		fi
 	}
 
