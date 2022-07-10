@@ -7,7 +7,6 @@
 # Notes about disabled ShellChecks:
 #   SC1090 -- Config files do not need to/cannot be checked as they are user-written. Default config is checked separately
 #   SC2015 -- Disabled where behaviour resembling an if-then-else is not intended
-#   SC2086 -- Disabled where word splitting is intended
 
 # Exit from caught signals
 exit_catch() {
@@ -86,7 +85,9 @@ end_term() {
 
 # Get current epoch timestamp in milliseconds
 get_date_ms() {
-	[ "$non_posix_date_s" = true ] && echo $(($(date -u "+%s%N / 1000000"))) || echo $(($(printf "%.0f" "$(date -u "+%S")") + $(printf "%.0f" "$(date -u "+%M")")$(date -u "+ * 60 + %k * 3600 + (")$(printf "%.0f" "$(date -u "+%j")")$(date -u "+ - 1) * 86400 + ((%Y - 1900) - 70) * 31536000 + (((%Y - 1900) - 69) / 4) * 86400 - (((%Y - 1900) - 1) / 100) * 86400 + (((%Y - 1900) + 299) / 400) * 86400%N / 1000000")))
+	# Epoch timestamp without '%s' taken from https://www.etalabs.net/sh_tricks.html
+	[ "$non_posix_date_s" = true ] && curr_epoch_sec="$(date -u "+%s")" || curr_epoch_sec="$(($(date -u "+((%Y-1600)*365+(%Y-1600)/4-(%Y-1600)/100+(%Y-1600)/400+1%j-1000-135140)*86400+(1%H-100)*3600+(1%M-100)*60+(1%S-100)")))"
+	echo "$(($(date -u "+${curr_epoch_sec}%N / 1000000")))"
 }
 
 # Get substring
@@ -157,7 +158,7 @@ while getopts ":w:n:s:qhilfp:bc:v" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v) printf "tspreed 2.4.0\n" && exit 0 ;;
+		v) printf "tspreed 2.4.1\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -225,7 +226,6 @@ input_words="$(echo "$input_info" | awk '{ print $1 }')"
 [ -n "$(command -v bc)" ] && use_bc=true || use_bc=false
 
 # Init presentation
-# shellcheck disable=SC2086
 if [ "$term_session" = true ]; then
 	tput smcup 2>/dev/null || exit_err 3 "smcup"
 else
