@@ -1,4 +1,4 @@
-.TH tspreed 1 2022-07-05
+.TH tspreed 1 2022-08-28
 
 .SH NAME
 \fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
@@ -19,77 +19,77 @@ If tspreed is terminated before the presentation has finished, the progress of t
 
 .SH OPTIONS
 .TP
-.B -w \fIwpm\fR
-Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of \fI1\fR, maximum value of \fI60000\fR.
+\fB-w\fR, \fB--wpm\fR \fIwpm\fR
+Present words at the given WPM (words per minute). Required to be set. Minimum value of \fI1\fR, maximum value of \fI60000\fR.
 .TP
-.B -n \fInum\fR 
-Start presenting from the \fIn\fRth word. Minimum value of \fI1\fR.
+\fB-n\fR, \fB--num-start\fR \fInum\fR
+Start presenting from the given \fIn\fRth word. Minimum value of \fI1\fR.
 .TP
-.B -s \fIchars\fR
-Characters used for word splitting in addition to \fB$IFS\fR. Backslash escapes are interpreted.
+\fB-s\fR, \fB--separators\fR \fIchars\fR
+Use the given characters to differentiate between words in addition to the characters set in \fB$IFS\fR. Backslash escapes are interpreted.
 .TP
-.B -l
+\fB-l\fR, \fB--length-vary\fR
 Vary the speed words are presented at based on their length.
 .TP
-.B -q
+\fB-q\fR, \fB--quiet-exit\fR
 Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished.
 .TP
-.B -h
+\fB-h\fR, \fB--hide-cursor\fR
 Hide the cursor during the presentation.
 .TP
-.B -i
+\fB-i\fR, \fB--progress-info\fR
 Display progress information during the presentation.
 .TP
-.B -f
+\fB-f\fR, \fB--focus\fR
 Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented.
 .TP
-.B -p \fIstyle\fR
+\fB-p\fR, \fB--focus-pointer\fR \fIstyle\fR
 Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: \fInone\fR, \fIline\fR, \fIpoint\fR.
 .TP
-.B -b
+\fB-b\fR, \fB--focus-bold\fR
 Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
 .TP
-.B -c \fIcolor\fR
-Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are ANSI X3.64 8-bit color values, ranging from \fI0\fR to \fI255\fR.
+\fB-c\fR, \fB--focus-color\fR \fIcolor\fR
+Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are \fIANSI X3.64\fR 8-bit color values, ranging from \fI0\fR to \fI255\fR.
 .TP
-.B -v
+\fB-v\fR, \fB-V\fR, \fB--version\fR
 Print \fBtspreed\fR version and exit.
 
 .SH CONFIGURATION
 The values provided in the command options take precedence over the values provided in the local configuration file, which takes precedence over the values provided in the global configuration file.
 .TP
 .B wpm=\fIwpm\fR
-Equivalent to the \fB-w\fR option.
+Equivalent to the \fB-w\fR/\fB--wpm\fR option.
 .TP
 .B numstart=\fInum\fR
-Equivalent to the \fB-n\fR option.
+Equivalent to the \fB-n\fR/\fB--num-start\fR option.
 .TP
 .B separators=\fIchars\fR
-Equivalent to the \fB-s\fR option.
+Equivalent to the \fB-s\fR/\fB--separators\fR option.
 .TP
 .B lengthvary=\fIbool\fR
-Equivalent to the \fB-l\fR option.
+Equivalent to the \fB-l\fR/\fB--length-vary\fR option.
 .TP
 .B quietexit=\fIbool\fR
-Equivalent to the \fB-q\fR option.
+Equivalent to the \fB-q\fR/\fB--quiet-exit\fR option.
 .TP
 .B hidecursor=\fIbool\fR
-Equivalent to the \fB-h\fR option.
+Equivalent to the \fB-h\fR/\fB--hide-cursor\fR option.
 .TP
 .B proginfo=\fIbool\fR
-Equivalent to the \fB-i\fR option.
+Equivalent to the \fB-i\fR/\fB--progress-info\fR option.
 .TP
 .B focus=\fIbool\fR
-Equivalent to the \fB-f\fR option.
+Equivalent to the \fB-f\fR/\fB--focus\fR option.
 .TP
 .B focuspointer=\fIstyle\fR
-Equivalent to the \fB-p\fR option.
+Equivalent to the \fB-p\fR/\fB--focus-pointer\fR option.
 .TP
 .B focusbold=\fIbool\fR
-Equivalent to the \fB-b\fR option.
+Equivalent to the \fB-b\fR/\fB--focus-bold\fR option.
 .TP
 .B focuscolor=\fIcolor\fR
-Equivalent to the \fB-c\fR option.
+Equivalent to the \fB-c\fR/\fB--focus-color\fR option.
 
 .SH EXIT STATUS
 .TP
@@ -128,12 +128,14 @@ Local configuration file.
 .P
 $ \fBtspreed < textfile\fR
 .P
+$ \fBtspreed --wpm 300 --hide-cursor < textfile\fR
+.P
 $ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihfb -p line -c 1\fR
 
 .SH PORTABILITY
 \fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script is guaranteed to not work on other Unix-like systems or issues specific to those systems will not be addressed, merely it is unknown how well supported the script is on other Unix-like systems.
 
-\fBtspreed\fR attempts to comply with \fIIEEE Std 1003.1-2001\fR (a.k.a. \fISUSv3\fR or \fIPOSIX.1-2001\fR) in order to be portable across Unix-like systems. However, \fBthe script must utilize at least one of the below non-compliant features or commands\fR and will exit with an error if none are supported:
+\fBtspreed\fR attempts to comply with \fIPOSIX.1-2001\fR through to \fIPOSIX.1-2008\fR in order to maintain portability across Unix-like systems. However, \fBthe script must utilize at least one of the below non-compliant features or commands\fR and will exit with an error if none are supported:
 
 .TP
 \fBdate\fR(1)
@@ -155,18 +157,18 @@ The script utilizes terminal capabilities via \fBtput\fR(1), but will fall back 
 For terminal styling and cursor movement
 .TP
 \fB$COLUMNS\fR, \fB$LINES\fR
-For determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not defined.
+For determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not set.
 
 .SH SEE ALSO
-\fBdate\fR(1), \fBsleep\fR(1), \fBusleep\fR(1), \fBterminfo\fR(5)
+\fBdate\fR(1), \fBsleep\fR(1), \fBusleep\fR(1), \fBterminfo\fR(5), \fBstandards\fR(7).
 
-.SH STANDARDS
+.SH CONFORMING TO
 .TP
-IEEE Std 1003.1-2001
+POSIX.1-2001, POSIX.1-2008.
 .TP
-ANSI X3.64
+ANSI X3.64.
 .TP
-XDG Base Directory Specification
+XDG Base Directory Specification v0.6+.
 
 .SH BUGS
 Bugs and issues can be reported on GitHub or GitLab.

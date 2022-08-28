@@ -45,6 +45,9 @@ To use, pipe plain text into tspreed.
 ```
 $ tspreed < textfile
 ```
+```
+$ tspreed --wpm 300 --hide-cursor < textfile
+```
 ```	
 $ pdftotext document.pdf - | tspreed -w 300 -n 120 -s '\r\f' -lqihfb -p line -c 1
 ```
@@ -55,26 +58,26 @@ The values provided in the command options take precedence over the values provi
 
 The default values are provided in [**./default.rc**](./default.rc), which is installed as the global configuration file.
 
-| Option     | Configuration file   | Default value | Description |
-| ---        | ---                  | ---           | ---         |
-| -w `wpm`   | wpm=`wpm`            | 300           | Speed words are presented at in WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
-| -n `num`   | numstart=`num`       |               | Start presenting from the *n*th word. Minimum value of 1. |
-| -s `chars` | separators=`chars`   | \r\f          | Characters used for word splitting in addition to `$IFS`. Backslash escapes are interpreted. |
-| -l         | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
-| -q         | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
-| -h         | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
-| -i         | proginfo=`bool`      |               | Display progress information during the presentation. |
-| -f         | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
-| -p `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
-| -b         | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c `color` | focuscolor=`color`   | 1             | Display the focus letter in a given color. Only takes effect if focus letter highlighting is enabled. Values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
-| -v         |                      |               | Print tspreed version and exit. |
+| Option                      | Configuration file   | Default value | Description |
+| ---                         | ---                  | ---           | ---         |
+| -w, --wpm `wpm`             | wpm=`wpm`            | 300           | Present words at the given WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
+| -n, --num-start `num`       | numstart=`num`       |               | Start presenting from the given *n*th word. Minimum value of 1. |
+| -s, --separators `chars`    | separators=`chars`   | \r\f          | Use the given characters to differentiate between words in addition to the characters set in `$IFS`. Backslash escapes are interpreted. |
+| -l, --length-vary           | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
+| -q, --quiet-exit            | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
+| -h, --hide-cursor           | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
+| -i, --progress-info         | proginfo=`bool`      |               | Display progress information during the presentation. |
+| -f, --focus                 | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
+| -p, --focus-pointer `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
+| -b, --focus-bold            | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
+| -c, --focus-color `color`   | focuscolor=`color`   | 1             | Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
+| -v, -V, --version           |                      |               | Print tspreed version and exit. |
 
 ## Portability
 
 tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script is guaranteed to not work on other Unix-like systems or issues specific to those systems will not be addressed, merely it is unknown how well supported the script is on other Unix-like systems.
 
-tspreed attempts to comply with [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) in order to be portable across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
+tspreed attempts to comply with [POSIX.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) through to [POSIX.1-2008](https://pubs.opengroup.org/onlinepubs/9699919799/) in order to maintain portability across Unix-like systems. However, **the script must utilize at least one of the below non-compliant features or commands** and will exit with an error if none are supported:
 
 * `date(1)` - Can return nanoseconds via the '%N' format.
 * `sleep(1)` - Supports the use of fractional values for the time operand to represent units of time less than 1 second, e.g. 0.05.
@@ -84,14 +87,14 @@ tspreed attempts to comply with [IEEE Std 1003.1-2001](https://pubs.opengroup.or
 The script utilizes terminal capabilities via `tput(1)`, but will fall back to the following where possible if those capabilities fail:
 
 * [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes for terminal styling and cursor movement.
-* `$COLUMNS` and `$LINES` environment variables for determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not defined.
+* `$COLUMNS` and `$LINES` environment variables for determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not set.
 
 ## Contributing
 
 Please adhere to the following when creating a pull request:
 
-* Ensure [ShellCheck](https://www.shellcheck.net/) returns no errors/warnings. This can be checked by either running `make test` with ShellCheck installed or by checking [**./tspreed**](./tspreed) (and [**./default.rc**](./default.rc) if changed) via the online checker. Any new errors/warnings and any suppressions of those errors/warnings should be explained.
-* Ensure all changes conform to [IEEE Std 1003.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) (a.k.a. SUSv3 or POSIX.1-2001) as much as possible. Any non-conformant changes should be explained.
+* Ensure changes do not cause [ShellCheck](https://www.shellcheck.net/) to return any errors or warnings. This can be checked by either running `make test` with ShellCheck installed, or by checking [**./tspreed**](./tspreed) (and [**./default.rc**](./default.rc) if changed) via the online checker. If changes include new warning suppressions please provide an explanation.
+* Ensure changes comply with [POSIX.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/), but does not include any features that are removed from or marked as obsolete in [POSIX.1-2008](https://pubs.opengroup.org/onlinepubs/9699919799/). If non-compliant changes are required please provide an explanation.
 * Ensure changes match the general coding style of the project.
 * Ensure changes are branched from `develop` and the pull request merges back into `develop`.
 
