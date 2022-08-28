@@ -1,4 +1,4 @@
-.TH tspreed 1 2022-08-28
+.TH tspreed 1 2022-08-29
 
 .SH NAME
 \fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
@@ -26,13 +26,13 @@ Present words at the given WPM (words per minute). Required to be set. Minimum v
 Start presenting from the given \fIn\fRth word. Minimum value of \fI1\fR.
 .TP
 \fB-s\fR, \fB--separators\fR \fIchars\fR
-Use the given characters to differentiate between words in addition to the characters set in \fB$IFS\fR. Backslash escapes are interpreted.
+Use the given characters to separate words in addition to the characters set in \fB$IFS\fR. Backslash escapes are interpreted.
 .TP
 \fB-l\fR, \fB--length-vary\fR
 Vary the speed words are presented at based on their length.
 .TP
 \fB-q\fR, \fB--quiet-exit\fR
-Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished.
+Do not output the presentation progress if tspreed is terminated before the presentation has finished.
 .TP
 \fB-h\fR, \fB--hide-cursor\fR
 Hide the cursor during the presentation.

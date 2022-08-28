@@ -62,15 +62,15 @@ The default values are provided in [**./default.rc**](./default.rc), which is in
 | ---                         | ---                  | ---           | ---         |
 | -w, --wpm `wpm`             | wpm=`wpm`            | 300           | Present words at the given WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
 | -n, --num-start `num`       | numstart=`num`       |               | Start presenting from the given *n*th word. Minimum value of 1. |
-| -s, --separators `chars`    | separators=`chars`   | \r\f          | Use the given characters to differentiate between words in addition to the characters set in `$IFS`. Backslash escapes are interpreted. |
+| -s, --separators `chars`    | separators=`chars`   | \r\f          | Use the given characters to separate words in addition to the characters set in `$IFS`. Backslash escapes are interpreted. |
 | -l, --length-vary           | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
-| -q, --quiet-exit            | quietexit=`bool`     |               | Do not pass presentation progress to stdout if tspreed is terminated before the presentation has finished. |
+| -q, --quiet-exit            | quietexit=`bool`     |               | Do not output the presentation progress if tspreed is terminated before the presentation has finished. |
 | -h, --hide-cursor           | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
 | -i, --progress-info         | proginfo=`bool`      |               | Display progress information during the presentation. |
 | -f, --focus                 | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
 | -p, --focus-pointer `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
 | -b, --focus-bold            | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c, --focus-color `color`   | focuscolor=`color`   | 1             | Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) 8-bit color values, ranging from 0 to 255. |
+| -c, --focus-color `color`   | focuscolor=`color`   | 1             | Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are [ANSI X3.64 8-bit color values](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit), ranging from 0 to 255. |
 | -v, -V, --version           |                      |               | Print tspreed version and exit. |
 
 ## Portability
