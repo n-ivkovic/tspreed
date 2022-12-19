@@ -7,6 +7,7 @@
 # Notes about disabled ShellChecks:
 #   SC1090 -- Config files do not need to/cannot be checked as they are user-written. Default config is checked separately
 #   SC2015 -- Disabled where behaviour resembling an if-then-else is not intended
+#   SC3045 -- Disabled where support for non-POSIX options are tested for and handled
 
 # Exit from caught signals
 exit_catch() {
@@ -40,6 +41,16 @@ term_color() {
 		# shellcheck disable=SC2015
 		[ "$1" -le 7 ] && printf "%b[3%sm" "\033" "$1" || exit_err 3 "setaf"
 	}
+}
+
+# Move to top row and clear
+term_init_top() {
+	printf "%s%s" "${term_home}" "${term_clear_line}"
+}
+
+# Move to bottom row and clear
+term_init_bottom() {
+	term_move "$term_height" 0 && printf "%s" "${term_clear_line}"
 }
 
 # Initialise output
@@ -120,6 +131,12 @@ calc_float() {
 	fi
 }
 
+# $1 Word number
+# $2 Total number of words
+print_presentation_info() {
+	printf "%s%b%s" "${1}/${2}" "\t" "$((($1 * 100) / $2))%"
+}
+
 # Import configs
 config_global="/etc/tspreed/tspreed.rc"
 config_local="${XDG_CONFIG_HOME:-$HOME/.config}/tspreed/tspreed.rc"
@@ -133,6 +150,7 @@ input=
 term_presenting=false
 word_first=true
 word_num=0
+word_paused=false
 word_len_average=5 # Based on average English word length of 5.1 letters
 focus_pointer_1=
 focus_pointer_2=
@@ -157,6 +175,7 @@ for arg in "$@"; do
 		"--quiet-exit")    set -- "$@" "-q" ;;
 		"--hide-cursor")   set -- "$@" "-h" ;;
 		"--progress-info") set -- "$@" "-i" ;;
+		"--key-controls")  set -- "$@" "-k" ;;
 		"--focus")         set -- "$@" "-f" ;;
 		"--focus-pointer") set -- "$@" "-p" ;;
 		"--focus-bold")    set -- "$@" "-b" ;;
@@ -168,7 +187,7 @@ done
 OPTIND=1
 
 # Parse options
-while getopts ":w:n:s:qhilfp:bc:vV" opt; do
+while getopts ":w:n:s:qhiklfp:bc:vV" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG ;;
 		n) numstart="$OPTARG" ;;
@@ -177,11 +196,12 @@ while getopts ":w:n:s:qhilfp:bc:vV" opt; do
 		q) quietexit=true ;;
 		h) hidecursor=true ;;
 		i) proginfo=true ;;
+		k) keycontrols=true ;;
 		f) focus=true ;;
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
-		v|V) printf "tspreed 2.5.0\n" && exit 0 ;;
+		v|V) printf "tspreed 2.6.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -213,12 +233,21 @@ done
 IFS="$(printf "%s%b" "$IFS" "$separators")"
 
 # Determine non-POSIX capabilities
+# shellcheck disable=SC3045
+read -rs -n 0 -t 0.0 2>/dev/null && non_posix_read=true || non_posix_read=false
 sleep 0e-3 2>/dev/null && non_posix_sleep_enotation=true || non_posix_sleep_enotation=false
 sleep 0.0 2>/dev/null && non_posix_sleep_fractional=true || non_posix_sleep_fractional=false
 [ -n "$(command -v usleep)" ] && non_posix_usleep=true || non_posix_usleep=false
 ! [ "$(date "+%N")" = "%N" ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
 ! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
-[ "$non_posix_sleep_enotation" = false ] && [ "$non_posix_sleep_fractional" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System does not support at least one of required non-POSIX features or commands"
+
+# Validate required non-POSIX capabilities
+if [ "$keycontrols" = true ]; then
+	[ "$non_posix_read" = false ] && exit_err 2 "System or shell does not support non-POSIX read(1)"
+	[ "$non_posix_date_n" = false ] && exit_err 2 "System or shell does not support non-POSIX date(1) '%N' format"
+else
+	[ "$non_posix_sleep_enotation" = false ] && [ "$non_posix_sleep_fractional" = false ] && [ "$non_posix_usleep" = false ] && [ "$non_posix_date_n" = false ] && exit_err 2 "System or shell does not support at least one of the required non-POSIX features or commands"
+fi
 
 # Determine terminal capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "%b[m" "\033")"
@@ -325,7 +354,7 @@ for word in $input; do
 	fi
 
 	# Print presentation information
-	[ "$proginfo" = true ] && printf "%s%s%b%s" "${term_home}${term_clear_line}" "${word_num}/${input_words}" "\t" "$(((word_num * 100) / input_words))%"
+	[ "$proginfo" = true ] && term_init_top && print_presentation_info "$word_num" "$input_words"
 
 	# End word
 	term_move "$term_height" 0
@@ -347,8 +376,42 @@ for word in $input; do
 		[ "$sleep_ms" -lt 1000 ] && sleep_ms=1000
 	}
 
-	# Sleep
-	[ "$sleep_ms" -gt 0 ] && {
+	# Sleep with keyboard controls
+	if [ "$keycontrols" = true ]; then
+		sleep_date=$(($(get_date_ms) + sleep_ms))
+		while [ "$(get_date_ms)" -lt "$sleep_date" ] || [ "$word_paused" = true ]; do
+			# shellcheck disable=SC3045
+			read -rs -n 1 -t 0.001 input_key < /dev/tty
+			case "$input_key" in
+				i)
+					if [ "$proginfo" = true ]; then
+						proginfo=false
+						term_init_top
+					else
+						proginfo=true
+						term_init_top && print_presentation_info "$word_num" "$input_words"
+					fi
+					;;
+				p)
+					if [ "$word_paused" = true ]; then
+						word_paused=false
+						term_init_bottom
+						# Sleep after unpause for minimum 0.5 seconds
+						[ "$sleep_ms" -lt 500 ] && sleep_ms=500
+						sleep_date=$(($(get_date_ms) + sleep_ms))
+					else
+						word_paused=true
+						term_init_bottom && printf "[ Paused ]"
+					fi
+					;;
+				q)
+					exit_catch
+					;;
+			esac
+		done
+		term_init_bottom
+	# Sleep only
+	elif [ "$sleep_ms" -gt 0 ]; then
 		if [ "$non_posix_sleep_enotation" = true ]; then
 			sleep "${sleep_ms}e-3"
 		elif [ "$non_posix_usleep" = true ]; then
@@ -361,9 +424,9 @@ for word in $input; do
 				:
 			done
 		else
-			exit_err 2 "System does not support at least one of required non-POSIX features or commands"
+			exit_err 2 "System or shell does not support at least one of the required non-POSIX features or commands"
 		fi
-	}
+	fi
 
 done
 

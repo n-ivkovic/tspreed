@@ -1,11 +1,11 @@
-.TH tspreed 1 2022-08-29
+.TH tspreed 1 2022-12-19
 
 .SH NAME
 \fBtspreed\fR \- terminal RSVP speed reader with Spritz-like functionality
 
 .SH SYNOPSIS
 .B tspreed
-[\fB\-lqhifbv\fR]
+[\fB\-lqhikfbv\fR]
 [\fB\-w\fR \fIwpm\fR]
 [\fB\-n\fR \fInum\fR]
 [\fB\-s\fR \fIchars\fR]
@@ -14,6 +14,10 @@
 
 .SH DESCRIPTION
 \fBtspreed\fR is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. It reads plain text from stdin and presents it one word at time.
+
+To begin a presentation, pipe plain text into \fBtspreed\fR.
+
+The presentation starts with the first word displayed for a minimum of 1 second, then all subsequent words are presented at the given speed (WPM).
 
 If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to stdout.
 
@@ -40,17 +44,20 @@ Hide the cursor during the presentation.
 \fB-i\fR, \fB--progress-info\fR
 Display progress information during the presentation.
 .TP
+\fB-k\fR, \fB--key-controls\fR
+Enable keyboard controls.
+.TP
 \fB-f\fR, \fB--focus\fR
 Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented.
 .TP
 \fB-p\fR, \fB--focus-pointer\fR \fIstyle\fR
-Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: \fInone\fR, \fIline\fR, \fIpoint\fR.
+Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled (\fB-f\fR/\fBfocus\fR option). Styles: \fInone\fR, \fIline\fR, \fIpoint\fR.
 .TP
 \fB-b\fR, \fB--focus-bold\fR
-Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled.
+Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled (\fB-f\fR/\fBfocus\fR option).
 .TP
 \fB-c\fR, \fB--focus-color\fR \fIcolor\fR
-Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are \fIANSI X3.64\fR 8-bit color values, ranging from \fI0\fR to \fI255\fR.
+Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled (\fB-f\fR/\fBfocus\fR option). Color values are \fIANSI X3.64\fR 8-bit color values, ranging from \fI0\fR to \fI255\fR.
 .TP
 \fB-v\fR, \fB-V\fR, \fB--version\fR
 Print \fBtspreed\fR version and exit.
@@ -79,6 +86,9 @@ Equivalent to the \fB-h\fR/\fB--hide-cursor\fR option.
 .B proginfo=\fIbool\fR
 Equivalent to the \fB-i\fR/\fB--progress-info\fR option.
 .TP
+.B keycontrols=\fIbool\fR
+Equivalent to the \fB-k\fR/\fB--key-controls\fR option.
+.TP
 .B focus=\fIbool\fR
 Equivalent to the \fB-f\fR/\fB--focus\fR option.
 .TP
@@ -90,6 +100,20 @@ Equivalent to the \fB-b\fR/\fB--focus-bold\fR option.
 .TP
 .B focuscolor=\fIcolor\fR
 Equivalent to the \fB-c\fR/\fB--focus-color\fR option.
+
+.SH KEYBOARD CONTROLS
+
+Keyboard controls can be enabled via the \fB-k\fR/\fBkeycontrols\fR option. Note that not all systems and shells are able to utilise keyboard controls, see the \fBPORTABILITY - POSIX-COMPLIANCE\fR section.
+
+.TP
+.B I
+Show/hide the presentation progress information.
+.TP
+.B P
+Pause/resume the presentation. After resuming, the word that was paused on is displayed for a minimum of 0.5 seconds.
+.TP
+.B Q
+Terminate the presentation.
 
 .SH EXIT STATUS
 .TP
@@ -106,7 +130,7 @@ Failure due to system not supporting at least one of the required non-POSIX feat
 Failure due to terminal (emulator) not supporting required capabilities.
 .TP
 .B 8
-Presentation terminated before completion - no failure.
+Success - presentation terminated before completion.
 
 .SH ENVIRONMENT
 .TP
@@ -130,12 +154,28 @@ $ \fBtspreed < textfile\fR
 .P
 $ \fBtspreed --wpm 300 --hide-cursor < textfile\fR
 .P
-$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihfb -p line -c 1\fR
+$ \fBpdftotext document.pdf - | tspreed -w 300 -n 120 -s '\\r\\f' -lqihkfb -p line -c 1\fR
 
 .SH PORTABILITY
 \fBtspreed\fR 'officially' supports GNU-based, BSD-based, and BusyBox-based systems only due to POSIX-compliance issues described below. This does not mean the script is guaranteed to not work on other Unix-like systems or issues specific to those systems will not be addressed, merely it is unknown how well supported the script is on other Unix-like systems.
 
-\fBtspreed\fR attempts to comply with \fIPOSIX.1-2001\fR through to \fIPOSIX.1-2008\fR in order to maintain portability across Unix-like systems. However, \fBthe script must utilize at least one of the below non-compliant features or commands\fR and will exit with an error if none are supported:
+.SH PORTABILITY - POSIX-COMPLIANCE
+
+.P
+\fBtspreed\fR attempts to comply with \fIPOSIX.1-2001\fR through to \fIPOSIX.1-2008\fR in order to maintain portability across Unix-like systems. However, the script must utilize non-compliant features and commands and will exit with an error if none are supported.
+
+.P
+If utilising keyboard controls (\fB-k\fR/\fBkeycontrols\fR option), \fIboth\fR of the below non-compliant features must be supported:
+
+.TP
+\fBdate\fR(1)
+Can return nanoseconds via the '%N' format.
+.TP
+\fBread\fR(1)
+Supports the -s option for disabling output, the -n option for limiting the number of characters read, and the -t option for specifying a timeout in fractional seconds. Bash's \fBread\fR builtin is the only major \fBread\fR(1) implementation which supports all listed non-compliant options, hence the script will likely need to be run through the Bash shell.
+
+.P
+Otherwise, \fIat least one\fR of the below non-compliant features and commands must be supported:
 
 .TP
 \fBdate\fR(1)
@@ -149,15 +189,20 @@ Supports the use of E notation for the time operand to represent units of time l
 .TP
 \fBusleep\fR(1)
 
+.SH PORTABILITY - TERMINAL I/O
+
 .P
 The script utilizes terminal capabilities via \fBtput\fR(1), but will fall back to the following where possible if those capabilities fail:
 
 .TP
 \fIANSI X3.64\fR escape codes
-For terminal styling and cursor movement
+For terminal styling and cursor movement.
 .TP
 \fB$COLUMNS\fR, \fB$LINES\fR
 For determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not set.
+
+.P
+If utilising keyboard controls (\fB-k\fR/\fBkeycontrols\fR option), \fI/dev/tty\fR is used to read keyboard input.
 
 .SH SEE ALSO
 \fBdate\fR(1), \fBsleep\fR(1), \fBusleep\fR(1), \fBterminfo\fR(5), \fBstandards\fR(7).
