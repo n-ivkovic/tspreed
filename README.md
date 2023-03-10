@@ -1,8 +1,6 @@
 # tspreed
 
-tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. It reads plain text from `stdin` and presents it one word at time.
-
-If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to `stdout`.
+tspreed is a terminal RSVP speed reader with Spritz-like functionality written in POSIX-compliant shell. The script reads plain text piped into it and presents it one word at time.
 
 ![tspreed demo gif](.img/tspreed.gif)
 
@@ -44,9 +42,11 @@ To begin a presentation, pipe plain text into tspreed.
 
 The presentation starts with the first word displayed for a minimum of 1 second, then all subsequent words are presented at the given speed (WPM).
 
+If tspreed is terminated before the presentation has finished, the progress of the presentation is passed to `stdout`.
+
 ### Keyboard controls
 
-Keyboard controls can be enabled via the -k/keycontrols option. Note that not all systems and shells are able to utilise keyboard controls, see the Portability section.
+Keyboard controls can be enabled via the -k/keycontrols option. However, not all systems and shells are able to utilise keyboard controls, see the Portability section.
 
 | Key | Action |
 | --- | ---    |
@@ -63,30 +63,31 @@ $ tspreed < textfile
 $ tspreed --wpm 300 --hide-cursor < textfile
 ```
 ```	
-$ pdftotext document.pdf - | tspreed -w 300 -n 120 -s '\r\f' -lqihkfb -p line -c 1
+$ pdftotext document.pdf - | tspreed -w 300 -n 120 -s '\r\f' -lqihkfb -p line -c 1 -K /dev/tty
 ```
 
 ## Configuration
 
 The values provided in the command options take precedence over the values provided in the local configuration file **`$XDG_CONFIG_HOME`/tspreed/tspreed.rc** (**~/.config/tspreed/tspreed.rc** if not defined), which takes precedence over the values provided in the global configuration file **/etc/tspreed/tspreed.rc**.
 
-The default values are provided in [**./default.rc**](./default.rc), which is installed as the global configuration file.
+The default configuration is provided in [**./default.rc**](./default.rc), which is installed as the global configuration file.
 
-| Option                      | Configuration file   | Default value | Description |
-| ---                         | ---                  | ---           | ---         |
-| -w, --wpm `wpm`             | wpm=`wpm`            | 300           | Present words at the given WPM (words per minute). Required to be set. Minimum value of 1, maximum value of 60000 |
-| -n, --num-start `num`       | numstart=`num`       |               | Start presenting from the given *n*th word. Minimum value of 1. |
-| -s, --separators `chars`    | separators=`chars`   | \r\f          | Use the given characters to separate words in addition to the characters set in `$IFS`. Backslash escapes are interpreted. |
-| -l, --length-vary           | lengthvary=`bool`    |               | Vary the speed words are presented at based on their length. |
-| -q, --quiet-exit            | quietexit=`bool`     |               | Do not output the presentation progress if tspreed is terminated before the presentation has finished. |
-| -h, --hide-cursor           | hidecursor=`bool`    | true          | Hide the cursor during the presentation. |
-| -i, --progress-info         | proginfo=`bool`      |               | Display progress information during the presentation. |
-| -k, --key-controls          | keycontrols=`bool`   |               | Enable keyboard controls. |
-| -f, --focus                 | focus=`bool`         |               | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
-| -p, --focus-pointer `style` | focuspointer=`style` | line          | Display pointers in a given style pointing towards the focus letter. Only takes effect if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
-| -b, --focus-bold            | focusbold=`bool`     | true          | Display the focus letter in bold. Only takes effect if focus letter highlighting is enabled. |
-| -c, --focus-color `color`   | focuscolor=`color`   | 1             | Display the focus letter in the given color. Only takes effect if focus letter highlighting is enabled. Color values are [ANSI X3.64 8-bit color values](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit), ranging from 0 to 255. |
-| -v, -V, --version           |                      |               | Print tspreed version and exit. |
+| Option                      | Configuration file   | Default config | Description |
+| ---                         | ---                  | ---            | ---         |
+| -w, --wpm `wpm`             | wpm=`wpm`            | 300            | Present words at the given speed in words per minute (WPM). Required to be set. Minimum value of 1, maximum value of 60000 |
+| -n, --num-start `num`       | numstart=`num`       |                | Start presenting from the given *n*th word. Minimum value of 1. |
+| -s, --separators `chars`    | separators=`chars`   | \r\f           | Use the given characters to separate words in addition to the characters set in `$IFS`. Backslash escapes are interpreted. |
+| -l, --length-vary           | lengthvary=`bool`    |                | Vary the speed words are presented at based on their length. |
+| -q, --quiet-exit            | quietexit=`bool`     |                | Do not output the presentation progress if tspreed is terminated before the presentation has finished. |
+| -h, --hide-cursor           | hidecursor=`bool`    | true           | Hide the cursor during the presentation. |
+| -i, --progress-info         | proginfo=`bool`      |                | Display progress information during the presentation. |
+| -k, --key-controls          | keycontrols=`bool`   |                | Enable keyboard controls. |
+| -f, --focus                 | focus=`bool`         |                | Highlight the focus letter (also known as the pivot or optimal recognition point) of the word being presented. |
+| -p, --focus-pointer `style` | focuspointer=`style` | line           | Display pointers in a given style pointing towards the focus letter. Only relevant if focus letter highlighting is enabled. Styles: `none`, `line`, `point`. |
+| -b, --focus-bold            | focusbold=`bool`     | true           | Display the focus letter in bold. Only relevant if focus letter highlighting is enabled. |
+| -c, --focus-color `color`   | focuscolor=`color`   | 1              | Display the focus letter in the given color. Only relevant if focus letter highlighting is enabled. Color values are [ANSI X3.64 8-bit color values](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit), ranging from 0 to 255. |
+| -K, --dev-key-input `path`  | devkeyinput=`path`   |                | Device/path to read keyboard input from. Only relevant if keyboard controls are enabled. Defaults to **/dev/tty**. |
+| -v, -V, --version           |                      |                | Print tspreed version and exit. |
 
 ## Portability
 
@@ -96,10 +97,10 @@ tspreed 'officially' supports GNU-based, BSD-based, and BusyBox-based systems on
 
 tspreed attempts to comply with [POSIX.1-2001](https://pubs.opengroup.org/onlinepubs/000095399/) through to [POSIX.1-2008](https://pubs.opengroup.org/onlinepubs/9699919799/) in order to maintain portability across Unix-like systems. However, the script must utilize non-compliant features and commands and will exit with an error if none are supported.
 
-If utilising keyboard controls (-k/keycontrols option), **both** of the below non-compliant features must be supported:
+If keyboard controls are enabled (-k/keycontrols option), **both** of the below non-compliant features must be supported:
 
 * `date(1)` - Can return nanoseconds via the '%N' format.
-* `read(1)` - Supports the -s option for disabling output, the -n option for limiting the number of characters read, and the -t option for specifying a timeout in fractional seconds. Bash's `read` builtin is the only major `read(1)` implementation which supports all listed non-compliant options, hence the script will likely need to be run through the Bash shell.
+* `read(1)` - Supports the -s option for disabling output, the -n option for limiting the number of characters read, and the -t option for specifying a timeout in fractional seconds. Bash's `read` builtin is the only major `read(1)` implementation which supports all listed non-compliant options, hence the script will likely need to be run via the Bash shell.
 
 Otherwise, **at least one** of the below non-compliant features and commands must be supported:
 
@@ -115,7 +116,7 @@ The script utilizes terminal capabilities via `tput(1)`, but will fall back to t
 * [ANSI X3.64](https://en.wikipedia.org/wiki/ANSI_escape_code) escape codes for terminal styling and cursor movement.
 * `$COLUMNS` and `$LINES` environment variables for determining terminal size. Will fall back to 80 columns and/or 24 lines if one or both of the environmental variables are not set.
 
-If utilising keyboard controls (-k/keycontrols option), **/dev/tty** is used to read keyboard input.
+If keyboard controls are enabled (-k/keycontrols option), keyboard input is read from **/dev/tty** by default. This can be changed via the -K/devkeyinput option.
 
 ## Contributing
 
@@ -128,7 +129,7 @@ Please adhere to the following when creating a pull request:
 
 ## License
 
-Copyright © 2022 Nicholas Ivkovic.
+Copyright © 2020-2023 Nicholas Ivkovic.
 
 Licensed under the GNU General Public License version 3 or later. See [**./LICENSE**](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
 

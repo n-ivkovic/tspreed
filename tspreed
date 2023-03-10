@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2022 Nicholas Ivkovic.
+# Copyright (c) 2020-2023 Nicholas Ivkovic.
 # Licensed under the GNU General Public License version 3 or later. See ./LICENSE, or <https://gnu.org/licenses/gpl.html> if more recent, for details.
 # This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
@@ -22,7 +22,7 @@ exit_catch() {
 exit_err() {
 	[ "$term_presenting" = true ] && end_term "$1"
 	[ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" >&2 || printf "%s\n" "$2" >&2
-	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color]\n" >&2
+	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color] [-K path]\n" >&2
 	printf "See 'man tspreed'\n" >&2
 	exit "$1"
 }
@@ -180,6 +180,7 @@ for arg in "$@"; do
 		"--focus-pointer") set -- "$@" "-p" ;;
 		"--focus-bold")    set -- "$@" "-b" ;;
 		"--focus-color")   set -- "$@" "-c" ;;
+		"--dev-key-input") set -- "$@" "-K" ;;
 		"--version")       set -- "$@" "-v" ;;
 		*)                 set -- "$@" "$arg" ;;
 	esac
@@ -187,7 +188,7 @@ done
 OPTIND=1
 
 # Parse options
-while getopts ":w:n:s:qhiklfp:bc:vV" opt; do
+while getopts ":w:n:s:qhiklfp:bc:K:vV" opt; do
 	case "$opt" in
 		w) wpm=$OPTARG ;;
 		n) numstart="$OPTARG" ;;
@@ -201,11 +202,16 @@ while getopts ":w:n:s:qhiklfp:bc:vV" opt; do
 		p) focuspointer="$OPTARG" ;;
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
+		K) devkeyinput="$OPTARG" ;;
 		v|V) printf "tspreed 2.6.0\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
 done
+
+# Validate and set keyboard input device/path
+[ -z "$devkeyinput" ] && devkeyinput='/dev/tty'
+[ -e "$devkeyinput" ] || exit_err 1 "Invalid keyboard input path '${devkeyinput}'"
 
 # Validate word speed
 [ -z "$wpm" ] && exit_err 1 "WPM not set"
@@ -381,7 +387,7 @@ for word in $input; do
 		sleep_date=$(($(get_date_ms) + sleep_ms))
 		while [ "$(get_date_ms)" -lt "$sleep_date" ] || [ "$word_paused" = true ]; do
 			# shellcheck disable=SC3045
-			read -rs -n 1 -t 0.001 input_key < /dev/tty
+			read -rs -n 1 -t 0.001 input_key < "$devkeyinput"
 			case "$input_key" in
 				i)
 					if [ "$proginfo" = true ]; then
