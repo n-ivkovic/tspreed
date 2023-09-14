@@ -22,7 +22,7 @@ exit_catch() {
 exit_err() {
 	[ "$term_presenting" = true ] && end_term "$1"
 	[ "$1" -eq 3 ] && printf "Terminal does not support capability '%s'\n" "$2" >&2 || printf "%s\n" "$2" >&2
-	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhifbv] [-w wpm] [-n num] [-p style] [-c color] [-K path]\n" >&2
+	[ "$1" -eq 1 ] && printf "Usage: tspreed [-lqhikfbv] [-w wpm] [-n num] [-p style] [-c color] [-K path]\n" >&2
 	printf "See 'man tspreed'\n" >&2
 	exit "$1"
 }
@@ -203,7 +203,7 @@ while getopts ":w:n:s:qhiklfp:bc:K:vV" opt; do
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
 		K) devkeyinput="$OPTARG" ;;
-		v|V) printf "tspreed 2.6.0\n" && exit 0 ;;
+		v|V) printf "tspreed 2.6.1\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -257,9 +257,9 @@ fi
 
 # Determine terminal capabilities
 term_reset="$(tput sgr0 2>/dev/null || printf "%b[m" "\033")"
-term_home="$(tput home 2>/dev/null || printf "%b[H" "\033")"
 term_bold="$(tput bold 2>/dev/null || printf "%b[1m" "\033")"
-term_clear_line="$(tput el 2 2>/dev/null || printf "%b[2K" "\033")"
+term_home="$(tput home 2>/dev/null || term_move 0 0)"
+term_clear_line="$(tput el 2>/dev/null || printf "%b[K" "\033")"
 [ -n "$(tput smcup 2>/dev/null)" ] && [ -n "$(tput rmcup 2>/dev/null)" ] && term_session=true || term_session=false
 [ "$term_session" = false ] && term_clear="$(printf "%s%s" "$term_home" "$(tput ed 2 2>/dev/null || printf "%b[2J" "\033")")" || term_clear="$(tput clear)" 2>/dev/null
 
