@@ -125,7 +125,7 @@ get_substr() {
 # $1 calculation to perform
 calc_float() {
 	if [ "$use_bc" = true ]; then
-		printf "%s\n" "$1" | bc
+		printf "scale=1; %s\n" "$1" | bc
 	else
 		awk "BEGIN { print ${1} }"
 	fi
