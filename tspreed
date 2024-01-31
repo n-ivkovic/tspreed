@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2020-2023 Nicholas Ivkovic.
+# Copyright (c) 2020-2024 Nicholas Ivkovic.
 # Licensed under the GNU General Public License version 3 or later. See ./LICENSE, or <https://gnu.org/licenses/gpl.html> if more recent, for details.
 # This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
@@ -125,7 +125,8 @@ get_substr() {
 # $1 calculation to perform
 calc_float() {
 	if [ "$use_bc" = true ]; then
-		printf "scale=1; %s\n" "$1" | bc
+		# No floating point calculation in script should return a negative result, so no handling of negative results implemented
+		printf "scale=3; %s\n" "$1" | bc | sed 's/^\./0./'
 	else
 		awk "BEGIN { print ${1} }"
 	fi
@@ -203,7 +204,7 @@ while getopts ":w:n:s:qhiklfp:bc:K:vV" opt; do
 		b) focusbold=true ;;
 		c) focuscolor="$OPTARG" ;;
 		K) devkeyinput="$OPTARG" ;;
-		v|V) printf "tspreed 2.6.1\n" && exit 0 ;;
+		v|V) printf "tspreed 2.6.2\n" && exit 0 ;;
 		\?) exit_err 1 "Invalid option '-${OPTARG}'" ;;
 		:) exit_err 1 "Option -${OPTARG} requires an argument." ;;
 	esac
@@ -367,14 +368,14 @@ for word in $input; do
 	[ $((word_x + word_len)) -gt "$term_width" ] && prev_word_len_exceed=true || prev_word_len_exceed=false
 
 	# Calculate sleep time
+	# No sleep time calculation should return a negative result, so no handling of negative sleep times implemented
 	sleep_ms_float=$(calc_float "1000 / (${wpm} / 60)")
 	[ "$lengthvary" = true ] && sleep_ms_float="$(calc_float "${sleep_ms_float} * ($([ "$word_len" -gt "$word_len_average" ] && echo "$word_len" || echo $((word_len_average - 1))) / ${word_len_average})")"
 	# Account for word processing time if possible
 	[ "$non_posix_date_n" = true ] && sleep_ms_float=$(calc_float "${sleep_ms_float} + ${word_start_date} - $(get_date_ms)")
 
-	# Convert sleep time to positive int
+	# Convert sleep time to int
 	sleep_ms="${sleep_ms_float%.*}"
-	[ "$(printf "%s" "$sleep_ms" | cut -c 1)" = "-" ] && sleep_ms=0
 
 	# Sleep first word for minimum 1 second
 	[ "$word_first" = true ] && {

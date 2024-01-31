@@ -129,7 +129,7 @@ Please adhere to the following when creating a pull request:
 
 ## License
 
-Copyright © 2020-2023 Nicholas Ivkovic.
+Copyright © 2020-2024 Nicholas Ivkovic.
 
 Licensed under the GNU General Public License version 3 or later. See [**./LICENSE**](./LICENSE), or [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html) if more recent, for details.
 
