@@ -245,8 +245,8 @@ read -rs -n 0 -t 0.0 2>/dev/null && non_posix_read=true || non_posix_read=false
 sleep 0e-3 2>/dev/null && non_posix_sleep_enotation=true || non_posix_sleep_enotation=false
 sleep 0.0 2>/dev/null && non_posix_sleep_fractional=true || non_posix_sleep_fractional=false
 [ -n "$(command -v usleep)" ] && non_posix_usleep=true || non_posix_usleep=false
-! [ "$(date "+%N")" = "%N" ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
-! [ "$(date "+%s")" = "%s" ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
+[ "$(date "+%N")" -ge 0 ] 2>/dev/null && non_posix_date_n=true || non_posix_date_n=false
+[ "$(date "+%s")" -ge 0 ] 2>/dev/null && non_posix_date_s=true || non_posix_date_s=false
 
 # Validate required non-POSIX capabilities
 if [ "$keycontrols" = true ]; then
